@@ -10,18 +10,23 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class RegistrationLoginApplication {
 
     public static void main(String[] args) {
-        // Load .env file from multiple possible locations
-        Dotenv dotenv = Dotenv.configure()
-                .directory("..") // Current directory
-                .ignoreIfMissing()
-                .filename(".env") // Explicitly specify filename
-                .load();
-
-        // Set system properties from .env
-        dotenv.entries().forEach(entry ->
-                System.setProperty(entry.getKey(), entry.getValue())
-        );
+        // Only load .env for local development
+        if (isLocalDevelopment()) {
+            Dotenv dotenv = Dotenv.configure()
+                    .directory("..")
+                    .ignoreIfMissing()
+                    .filename(".env")
+                    .load();
+            dotenv.entries().forEach(entry ->
+                    System.setProperty(entry.getKey(), entry.getValue())
+            );
+        }
 
         SpringApplication.run(RegistrationLoginApplication.class, args);
+    }
+
+    private static boolean isLocalDevelopment() {
+        return System.getenv("RAILWAY") == null &&
+                System.getenv("RAILWAY_ENVIRONMENT") == null;
     }
 }
