@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${discussion.discussionName} + ' - Report'">Discussion Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            padding: 0;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 30px;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 30px;
+        }
+
+        .report-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .report-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .meta-item {
+            background: rgba(255,255,255,0.15);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .content-area {
+            padding: 0 30px 30px;
+        }
+
+        .question-block {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--accent-color);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .question-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .question-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: #e8f4fd;
+            color: var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .final-answer {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 15px 0;
+            border-left: 3px solid var(--success-color);
+        }
+
+        .question-rank-table {
+            margin: 20px 0;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+
+        .rank-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .rank-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .rank-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .round-block {
+            margin: 25px 0;
+        }
+
+        .round-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-container {
+            margin-bottom: 20px;
+        }
+
+        .chart-canvas-container {
+            position: relative;
+            height: 300px;
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+        }
+
+        .ai-summary {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+
+        .ai-summary strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        /* Button Styles */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 0 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--success-color), #2e7d32);
+            color: white;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
+        }
+
+        /* PDF Specific Styles */
+        @media print {
+            body {
+                background: white !important;
+                font-size: 12pt;
+                padding: 0;
+            }
+
+            .main-container {
+                box-shadow: none;
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .report-header {
+                background: var(--primary-color) !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                border-radius: 0;
+            }
+
+            .question-block {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .button-container {
+                display: none;
+            }
+
+            .chart-container {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .accordion-collapse {
+                display: block !important;
+            }
+
+            /* Prevent tables from breaking across pages */
+            .question-rank-table {
+                page-break-inside: avoid;
+            }
+
+            .rank-table {
+                page-break-inside: avoid;
+            }
+
+            .ai-summary {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .report-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .report-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .question-stats {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content-area {
+                padding: 0 15px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="main-container" id="report-content">
+    <!-- Header -->
+    <div class="report-header">
+        <h1 th:text="${discussion.discussionName}">Discussion Name</h1>
+        <div class="report-meta">
+            <div class="meta-item">
+                <i class="bi bi-hash"></i> Code: <span th:text="${discussion.uniqueCode}"></span>
+            </div>
+            <div class="meta-item">
+                <i class="bi bi-people"></i> Participants: <span th:text="${discussion.numberOfParticipants}"></span>
+            </div>
+            <div class="meta-item">
+                <i class="bi bi-question-circle"></i> Questions: <span th:text="${discussion.numberOfQuestions}"></span>
+            </div>
+            <div class="meta-item">
+                <i class="bi bi-calendar-event"></i> Scheduled: <span id="scheduledTime" th:text="${discussion.scheduledTime}"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <!-- Question Loop -->
+        <div th:each="question, iterStat : ${discussion.questions}" class="question-block">
+            <div class="question-title" th:text="'Q' + ${iterStat.index + 1} + ': ' + ${question.questionText}"></div>
+
+            <div class="question-stats">
+                <div class="stat-badge">
+                    <i class="bi bi-list-ul"></i> Persisting Options:
+                    <span th:text="${question.persistingOptionsCount}"></span>
+                </div>
+            </div>
+
+            <div class="final-answer" th:if="${question.answer}">
+                <i class="bi bi-check-circle"></i> Final Answer: <span th:text="${question.answer}"></span>
+            </div>
+
+            <!-- Question Rank Table -->
+            <div class="question-rank-table mt-3">
+                <table class="table table-sm table-bordered rank-table">
+                    <colgroup>
+                        <col style="width: 10%;">
+                        <col style="width: 50%;">
+                        <col style="width: 20%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Option</th>
+                        <th>Average Score</th>
+                    </tr>
+                    </thead>
+                    <tbody th:attr="id='rank-table-' + ${question.id}"></tbody>
+                </table>
+
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    (function() {
+                        const qId = [[${question.id}]];
+                        const rankTableBody = document.getElementById('rank-table-' + qId);
+
+                        // Serialize Thymeleaf object to JSON
+                        const allRounds = /*[[${question.roundWiseScores}]]*/ {};
+
+                        // Convert to JS array of maps (keys are option names). When Thymeleaf serializes a Map, it becomes an object.
+                        // Use Object.values to get the round maps regardless of key type.
+                        const roundsArray = Array.isArray(allRounds) ? allRounds : Object.values(allRounds);
+
+                        // Compute average scores
+                        const optionTotals = {};
+                        const optionCounts = {};
+
+                        roundsArray.forEach(roundMap => {
+                            Object.entries(roundMap).forEach(([option, score]) => {
+                                if (!(option in optionTotals)) {
+                                    optionTotals[option] = 0;
+                                    optionCounts[option] = 0;
+                                }
+                                optionTotals[option] += score;
+                                optionCounts[option] += 1;
+                            });
+                        });
+
+                        const avgScores = {};
+                        Object.keys(optionTotals).forEach(option => {
+                            avgScores[option] = optionTotals[option] / optionCounts[option];
+                        });
+
+                        // Sort descending
+                        const rankedOptions = Object.entries(avgScores)
+                            .sort((a, b) => b[1] - a[1]);
+
+                        // Populate table
+                        let tableHTML = '';
+                        rankedOptions.forEach(([option, avg], index) => {
+                            tableHTML += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td style="white-space: normal; word-break: break-word;">${option}</td>
+                                    <td>${avg.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        });
+                        rankTableBody.innerHTML = tableHTML;
+                    })();
+                    /*]]>*/
+                </script>
+            </div>
+
+            <!-- Round-wise charts -->
+            <div th:each="roundEntry : ${question.roundWiseScores}" class="round-block">
+                <div class="round-title" th:text="'Round ' + ${roundEntry.key}"></div>
+                <div class="chart-container" style="height: 300px;">
+                    <div class="chart-canvas-container">
+                        <canvas th:attr="id='chart-' + ${question.id} + '-' + ${roundEntry.key}"
+                                style="width: 100% !important; max-width: 100% !important;"></canvas>
+                    </div>
+                </div>
+
+                <script th:inline="javascript">
+                    /*<![CDATA[*/
+                    (function() {
+                        const qId = [[${question.id}]];
+                        const roundNum = [[${roundEntry.key}]];
+                        const ctx = document.getElementById('chart-' + qId + '-' + roundNum);
+
+                        const dataMap = [[${roundEntry.value}]]; // Map<String, Double>
+                        const labelsFull = Object.keys(dataMap);
+                        const values = Object.values(dataMap);
+
+                        // ✅ Truncate long labels
+                        const labelsShort = labelsFull.map(label =>
+                            label.length > 20 ? label.substring(0, 20) + "…" : label
+                        );
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labelsShort,
+                                datasets: [{
+                                    label: 'Score',
+                                    data: values,
+                                    backgroundColor: labelsShort.map(() => 'rgba(52, 152, 219, 0.5)'),
+                                    borderColor: labelsShort.map(() => 'rgba(41, 128, 185, 1)'),
+                                    borderWidth: 1,
+                                    barThickness: 50,
+                                    maxBarThickness: 50
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            drawTicks: false,
+                                            drawBorder: false,
+                                            drawOnChartArea: false
+                                        },
+                                        ticks: {
+                                            autoSkip: false,
+                                            maxRotation: 0,
+                                            minRotation: 0,
+                                            font: {
+                                                size: 12
+                                            }
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        min: 0,
+                                        max: 100, // ✅ Fixed scale 0–100
+                                        ticks: {
+                                            stepSize: 20
+                                        },
+                                        grid: {
+                                            drawBorder: false
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        callbacks: {
+                                            title: function(context) {
+                                                const index = context[0].dataIndex;
+                                                // ✅ Show full option name on hover
+                                                return labelsFull[index];
+                                            },
+                                            label: function(context) {
+                                                return "Score: " + context.formattedValue;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    })();
+                    /*]]>*/
+                </script>
+            </div>
+
+            <!-- ✅ Question-wise Chat Dropdown -->
+            <div th:if="${question.chatSegments}" class="mt-4">
+                <div class="accordion" th:attr="id='chatAccordion-' + ${question.id}">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" th:attr="id='heading-' + ${question.id}">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse"
+                                    aria-expanded="false"
+                                    th:attr="data-bs-target='#collapse-' + ${question.id},
+                                     aria-controls='collapse-' + ${question.id}">
+                                💬 View Discussion Chats
+                            </button>
+                        </h2>
+                        <div class="accordion-collapse collapse"
+                             th:attr="id='collapse-' + ${question.id},
+                              aria-labelledby='heading-' + ${question.id},
+                              data-bs-parent='#chatAccordion-' + ${question.id}">
+                            <div class="accordion-body">
+                                <div th:each="chat, iterStat : ${question.chatSegments}">
+                                    <h6 class="fw-bold text-secondary" th:text="'Round ' + ${iterStat.index + 1}"></h6>
+                                    <pre class="p-3 bg-light border rounded" style="white-space: pre-wrap;"
+                                         th:text="${chat}"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Summary Placeholder -->
+            <div class="ai-summary mt-4">
+                <strong>AI Insight:</strong><br>
+                <span>This space will contain AI-generated explanation or behavioral insight for the above question.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Improved Button Container -->
+<div class="button-container">
+    <div class="button-group">
+        <button id="download-pdf" class="btn btn-download">
+            <i class="bi bi-file-earmark-pdf"></i> Download PDF
+        </button>
+        <a th:href="@{/past}" class="btn btn-back">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Format Time -->
+<script>
+    function formatDateTime(isoDateString) {
+        if (!isoDateString) return 'N/A';
+        const date = new Date(isoDateString);
+        if (isNaN(date.getTime())) return isoDateString;
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const scheduled = document.getElementById('scheduledTime');
+        if (scheduled) {
+            scheduled.textContent = formatDateTime(scheduled.textContent);
+        }
+
+        // PDF download functionality
+        document.getElementById('download-pdf').addEventListener('click', generatePDF);
+    });
+
+    function generatePDF() {
+        // Show loading state
+        const btn = document.getElementById('download-pdf');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating PDF...';
+        btn.disabled = true;
+
+        // Expand all accordions for PDF
+        const accordions = document.querySelectorAll('.accordion-collapse');
+        accordions.forEach(accordion => {
+            accordion.classList.add('show');
+        });
+
+        // Get discussion name for filename
+        const discussionName = document.querySelector('.report-header h1').textContent;
+        const safeFilename = discussionName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+
+        // Get the report content
+        const element = document.getElementById('report-content');
+
+        // Configure PDF options
+        const options = {
+            margin: [10, 10, 10, 10],
+            filename: `${safeFilename}_report.pdf`,
+            image: {
+                type: 'jpeg',
+                quality: 0.98
+            },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                scrollY: 0,
+                windowHeight: document.documentElement.offsetHeight,
+                backgroundColor: '#ffffff'
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait'
+            },
+            pagebreak: {
+                mode: ['avoid-all', 'css', 'legacy']
+            }
+        };
+
+        // Generate PDF
+        html2pdf().set(options).from(element).save().then(() => {
+            // Restore button state
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+
+            // Collapse accordions again
+            accordions.forEach(accordion => {
+                accordion.classList.remove('show');
+            });
+        }).catch(error => {
+            console.error('PDF generation failed:', error);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            alert('Failed to generate PDF. Please try again.');
+        });
+    }
+</script>
+</body>
+</html>

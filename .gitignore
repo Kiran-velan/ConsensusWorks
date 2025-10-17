@@ -1,0 +1,66 @@
+# Environment variables
+.env
+
+# Java/Maven - Swarm directory
+/swarm/target/
+/swarm/pom.xml.tag
+/swarm/release.properties
+/swarm/dependency-reduced-pom.xml
+/swarm/buildNumber.properties
+/swarm/.mvn/
+!.mvn/wrapper/
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Python - microservice directory
+/microservice/__pycache__/
+/microservice/*.py[cod]
+/microservice/build/
+/microservice/dist/
+/microservice/*.egg-info/
+
+# Logs (in both root and swarm directory)
+/logs/
+/swarm/logs/
+swarm/chat_logs/
+swarm/discussion_logs/
+swarm/discussion_websocket_logs/
+
+# IDE and Editor files (applies to all directories)
+.idea/
+.vscode/
+.swarm/idea/
+.swarm/.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Build outputs (Java)
+*.class
+*.jar
+*.war
+
+# Python virtual environments
+microservice/venv/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Local development
+*.swp
+*.swo
+*~
+/swarm/*.log
+/swarm/heapdump.hprof
+/swarm/hs_err_pid*
+/swarm/replay_pid*
+
+# Local development databases
+*.db
+*.sqlite3
+
+# Application specific
+/swarm/*.jar
+/microservice/instance/
+/microservice/*.db

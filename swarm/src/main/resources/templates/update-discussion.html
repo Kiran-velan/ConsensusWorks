@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Discussion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e3f2fd;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2e7d32, #0288d1);
+            color: white;
+            text-align: center;
+            padding: 10px 0; /* Reduced padding */
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px; /* Reduced font size */
+            position: relative; /* Add relative positioning */
+            top: 15px; /* Move the text down by 5px */
+            font-weight: bold;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2e7d32, #0288d1);
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 15px;
+        }
+
+        .input-box, .description-box {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 2px solid #2a67c2;
+            background-color: white;
+            color: #2a67c2;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .btn-save, .bottom-btn {
+            background-color: #2a67c2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            margin-top: 10px;
+        }
+
+        .question-container {
+            margin-top: 10px;
+            border: 2px solid #2a67c2;
+            padding: 10px;
+            background-color: #ffffff;
+        }
+
+        .option-entry {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .add-btn{
+            background-color: #2a67c2;
+            color: white;
+            padding: 5px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px; /* Added rounded corners */
+        }
+
+        .add-btn:hover {
+            background-color: #1a4a8a; /* Darker shade on hover */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Added shadow on hover */
+        }
+
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 15px; /* Adjusted padding for a larger button */
+            border: none;
+            cursor: pointer;
+            border-radius: 5px; /* Added rounded corners */
+            font-size: 14px; /* Adjusted font size */
+            transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+        }
+
+        .remove-btn:hover {
+            background-color: #c82333; /* Darker shade on hover */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Added shadow on hover */
+        }
+
+        .main-container {
+            width: 100%;
+            padding-bottom: 20px;
+            margin-top: 10px; /* Added margin to bring content upwards */
+        }
+
+        .alert-message {
+            display: none;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .move-up, .move-down {
+            background-color: #2a67c2; /* Blue color */
+            color: white; /* White text for contrast */
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold; /* Make the text bold */
+            cursor: pointer;
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+        }
+
+        .move-up:hover, .move-down:hover {
+            background-color: #1a4a8a; /* Darker blue on hover */
+        }
+
+        .horizontal-inputs {
+            display: flex;
+            justify-content: space-between; /* Space between the two input groups */
+            gap: 20px; /* Add space between the inputs */
+            margin: 10px 0; /* Margin for spacing */
+        }
+
+        .input-group {
+            flex: 1; /* Each input group takes equal width */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center align the content */
+        }
+
+        .number-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px; /* Space between buttons and input */
+            margin: 5px 0; /* Margin for spacing */
+        }
+
+        .number-input input {
+            width: 500px; /* Fixed width for the input field */
+            text-align: center; /* Center the text inside the input */
+        }
+
+        .btn-increase, .btn-decrease {
+            background-color: #2a67c2; /* Blue color */
+            color: white; /* White text */
+            border: none;
+            padding: 5px 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px; /* Rounded corners */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+        }
+
+        .btn-increase:hover:not(:disabled), .btn-decrease:hover:not(:disabled) {
+            background-color: #1a4a8a; /* Darker blue on hover */
+        }
+
+        .btn-increase:disabled, .btn-decrease:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #6c757d; /* Gray color for disabled state */
+        }
+
+        .btn-decrease {
+            background-color: #dc3545; /* Red color for decrease button */
+        }
+
+        .btn-decrease:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+
+        /* Hide the spinners (increase/decrease arrows) for number inputs */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .error-highlight {
+            border: 1px solid red !important;
+            outline: none;
+            box-shadow: 0 0 3px red;
+        }
+
+        /* For Firefox */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .back-btn {
+            background-color: #ffffff;
+            color: #1976D2;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="header">
+    <h1>Update Discussion Details</h1>
+</div>
+
+<div class="header-container">
+    <div class="header-left"></div>
+    <div class="header-right">
+        <button class="back-btn" onclick="window.location.href='/past'">Back</button>
+    </div>
+</div>
+
+<div class="container main-container text-center">
+    <!-- Discussion Name -->
+    <label>Discussion Name*</label>
+    <input type="text" id="discussionName" class="input-box" placeholder="Enter discussion name">
+
+    <div class="horizontal-inputs">
+        <!-- Scheduled Time -->
+        <div class="input-group">
+            <label>Scheduled Time*</label>
+            <input type="datetime-local" id="scheduledTime" class="input-box" placeholder="Select scheduled time" style = "max-width: 500px;">
+        </div>
+
+        <!-- Discussion Type -->
+        <div class="input-group">
+            <label>Discussion Type*</label>
+            <select id="discussionType" class="input-box" style="max-width: 500px;">
+                <option value="decision-making">Decision-making</option>
+                <option value="survey">Survey</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Number of Participants and Number of Questions -->
+    <div class="horizontal-inputs">
+        <div class="input-group">
+            <label>Number of Participants*</label>
+            <div class="number-input">
+                <button class="btn btn-sm btn-decrease" onclick="decreaseParticipants()">-</button>
+                <input type="number" id="numParticipants" class="input-box" placeholder="Enter number of participants" min="1" oninput="this.classList.remove('error-highlight')">
+                <button class="btn btn-sm btn-increase" onclick="increaseParticipants()">+</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Number of Questions*</label>
+            <div class="number-input">
+                <button class="btn btn-sm btn-decrease" onclick="decreaseQuestions()">-</button>
+                <input type="number" id="numQuestions" class="input-box" placeholder="Enter number of questions" min="1" oninput="generateQuestions()">
+                <button class="btn btn-sm btn-increase" onclick="increaseQuestions()">+</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Container -->
+    <div id="questionsContainer"></div>
+
+    <!-- Description -->
+    <br>
+    <label>Description of the Discussion Topic</label>
+    <textarea id="discussionDescription" class="description-box" rows="4" placeholder="Write Description"></textarea>
+
+    <!-- Alert Message -->
+    <div class="alert-message" id="alertMessage"></div>
+
+    <div class="text-center mt-3">
+        <button class="btn btn-save" id="updateBtn" type="button" onclick="updateDiscussion()">Update</button>
+    </div>
+</div>
+
+<script>
+
+    const input = document.getElementById('scheduledTime');
+    input.addEventListener('click', () => input.showPicker?.());
+    input.addEventListener('focus', () => input.showPicker?.());
+
+function increaseParticipants() {
+    const input = document.getElementById('numParticipants');
+    let value = parseInt(input.value) || 0;
+    value++;
+    input.value = value;
+    input.classList.remove('error-highlight');
+}
+
+function decreaseParticipants() {
+    const input = document.getElementById('numParticipants');
+    let value = parseInt(input.value) || 0;
+    if (value > 1) { // Ensure the value doesn't go below 1
+        value--;
+        input.value = value;
+        input.classList.remove('error-highlight');
+    }
+}
+
+function increaseQuestions() {
+    const input = document.getElementById('numQuestions');
+    const increaseBtn = document.querySelector('button[onclick="increaseQuestions()"]');
+    let value = parseInt(input.value) || 0;
+
+    if (value < 10) {
+        value++;
+        input.value = value;
+        input.classList.remove('error-highlight');
+        generateQuestions();
+
+        // Disable + button if we've reached the max
+        if (value >= 10) {
+            increaseBtn.disabled = true;
+        }
+
+        // Make sure - button is enabled when increasing from 1
+        const decreaseBtn = document.querySelector('button[onclick="decreaseQuestions()"]');
+        decreaseBtn.disabled = false;
+    }
+}
+
+function decreaseQuestions() {
+    const input = document.getElementById('numQuestions');
+    const increaseBtn = document.querySelector('button[onclick="increaseQuestions()"]');
+    let value = parseInt(input.value) || 0;
+
+    if (value > 1) { // Ensure the value doesn't go below 1
+        value--;
+        input.value = value;
+        input.classList.remove('error-highlight');
+        generateQuestions();
+
+        // Enable + button when decreasing from 10
+        if (value < 10) {
+            increaseBtn.disabled = false;
+        }
+    }
+}
+
+function moveQuestionUp(button) {
+    const questionDiv = button.closest('.question-container');
+    const prevQuestionDiv = questionDiv.previousElementSibling;
+
+    if (prevQuestionDiv) {
+        questionDiv.parentNode.insertBefore(questionDiv, prevQuestionDiv);
+    }
+}
+
+function moveQuestionDown(button) {
+    const questionDiv = button.closest('.question-container');
+    const nextQuestionDiv = questionDiv.nextElementSibling;
+
+    if (nextQuestionDiv) {
+        questionDiv.parentNode.insertBefore(nextQuestionDiv, questionDiv);
+    }
+}
+
+function deleteQuestion(button) {
+    const questionDiv = button.closest('.question-container');
+    questionDiv.remove(); // Remove the question element
+
+    // Update the number input field
+    const input = document.getElementById('numQuestions');
+    let value = parseInt(input.value) || 1;
+    input.value = Math.max(1, value - 1); // Avoid going below 1
+
+    // Regenerate to reassign placeholder numbering and preserve content
+    generateQuestions();
+}
+
+function showAlert(message, type) {
+    const alertMessage = document.getElementById('alertMessage');
+    alertMessage.textContent = message;
+    alertMessage.className = 'alert-message alert-' + type;
+    alertMessage.style.display = 'block';
+
+    setTimeout(() => {
+        alertMessage.style.display = 'none';
+    }, 4000);
+}
+
+// ✅ Set minimum date-time for 'Scheduled Time' field to the current date-time
+window.onload = function () {
+    const now = new Date().toISOString().slice(0, 16);
+    document.getElementById('scheduledTime').min = now;
+};
+
+function generateQuestions() {
+    const container = document.getElementById('questionsContainer');
+    const existingQuestions = Array.from(container.querySelectorAll('.question-container')).map(container => {
+        return {
+            container, // Save the container reference
+            questionText: container.querySelector('.question').value.trim(),
+            options: Array.from(container.querySelectorAll('.option')).map(opt => opt.value.trim()),
+            questionId: container.getAttribute('data-question-id') || null, // Preserve question ID
+            persistingOptionsCount: parseInt(container.querySelector('.options-count')?.value) || 3
+        };
+    });
+
+    const numQuestions = parseInt(document.getElementById('numQuestions').value) || 0;
+
+    // Remove excess question containers if the number of questions decreases
+    while (container.children.length > numQuestions) {
+        container.removeChild(container.lastChild);
+    }
+
+    for (let i = 0; i < numQuestions; i++) {
+        let questionDiv;
+        const existingData = existingQuestions[i] || { questionText: '', options: [], questionId: null, persistingOptionsCount: 3 };
+
+        if (i < existingQuestions.length) {
+            // Reuse existing question container
+            questionDiv = existingData.container;
+        } else {
+            // Create a new question container
+            questionDiv = document.createElement('div');
+            questionDiv.classList.add('question-container');
+            questionDiv.innerHTML = `
+                <div class="question-controls d-flex align-items-center justify-content-between">
+                    <div class="move-buttons">
+                        <button class="btn btn-sm btn-secondary move-up" onclick="moveQuestionUp(this)">▲</button>
+                        <button class="btn btn-sm btn-secondary move-down" onclick="moveQuestionDown(this)">▼</button>
+                    </div>
+                    <select class="form-select form-select-sm options-count" style="width: 75px;" title="Persisting Options Count">
+                        ${[0, 1, 2, 3, 4, 5].map(n => `
+                            <option value="${n}" ${n === (existingData.persistingOptionsCount ?? 3) ? 'selected' : ''}>${n}</option>
+                        `).join('')}
+                    </select>
+                    <button class="btn btn-sm btn-danger ms-1 delete-question" onclick="deleteQuestion(this)">✖</button>
+                </div>
+                <input type="text" class="input-box question" placeholder="Enter question ${i + 1}" value="${existingData.questionText}">
+                <div class="options-container"></div>
+                <button class="add-btn" onclick="addOption(this)">Add Option</button>
+            `;
+            container.appendChild(questionDiv);
+        }
+
+        const questionInput = questionDiv.querySelector('.question');
+        questionInput.value = existingData.questionText;
+
+        if (existingData.questionId) {
+            questionDiv.setAttribute('data-question-id', existingData.questionId);
+        }
+
+        const optionsContainer = questionDiv.querySelector('.options-container');
+        optionsContainer.innerHTML = ''; // Clear existing options
+
+        existingData.options.forEach(optionText => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('option-entry');
+            optionDiv.innerHTML = `
+                <input type="text" class="input-box option" placeholder="Enter option" value="${optionText}">
+                <button class="remove-btn" onclick="removeOption(this)">Remove</button>
+            `;
+            optionsContainer.appendChild(optionDiv);
+        });
+    }
+}
+
+
+function addOption(button) {
+    const optionsContainer = button.previousElementSibling;
+
+    if (optionsContainer.children.length >= 20) {
+        showAlert("Maximum 20 options allowed per question.", 'error');
+        return;
+    }
+
+    // Create a new option input field
+    const optionDiv = document.createElement('div');
+    optionDiv.classList.add('option-entry');
+    optionDiv.innerHTML = `
+        <input type="text" class="input-box option" placeholder="Enter option" onblur="validateOption(this)">
+        <button class="remove-btn" onclick="removeOption(this)">Remove</button>
+    `;
+
+    optionsContainer.appendChild(optionDiv);
+
+    // Automatically focus on the new input field
+    const newInput = optionDiv.querySelector('input');
+    newInput.focus();
+
+    // Add event listener for Enter key
+    newInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent default form submission behavior
+            addOption(button); // Trigger the addOption function
+        }
+    });
+}
+
+// Function to validate the entered option (prevents empty and duplicate values)
+function validateOption(input) {
+    const optionsContainer = input.closest('.options-container');
+    const existingOptions = Array.from(optionsContainer.querySelectorAll('.option'))
+        .map(opt => opt.value.trim().toLowerCase())
+        .filter(opt => opt !== "");
+
+    const inputValue = input.value.trim().toLowerCase(); // Normalize input value to lowercase
+
+    if (!inputValue) {
+        showAlert("Option cannot be empty.", 'error');
+        input.parentElement.remove(); // Remove the empty input field
+        return;
+    }
+
+    if (existingOptions.filter(opt => opt === inputValue).length > 1) {
+        showAlert("Duplicate option not allowed.", 'error');
+        input.parentElement.remove(); // Remove duplicate input field
+    }
+}
+
+function removeOption(button) {
+    button.parentElement.remove();
+}
+
+document.addEventListener("DOMContentLoaded", async function () {
+    const params = new URLSearchParams(window.location.search);
+    const discussionId = params.get("discussionId");  // ✅ Use discussionId
+
+    if (discussionId) {
+        await fetchDiscussionDetails(discussionId);
+    } else {
+        alert("Invalid discussion details!");
+        return;
+    }
+});
+
+async function fetchDiscussionDetails(discussionId) {
+    try {
+        const response = await fetch(`/discussions/update/${discussionId}`);
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch discussion details");
+        }
+
+        const discussionData = await response.json();
+
+        document.getElementById('discussionName').value = discussionData.discussionName;
+        document.getElementById('numParticipants').value = discussionData.numberOfParticipants;
+        document.getElementById('numQuestions').value = discussionData.numberOfQuestions;
+        document.getElementById('scheduledTime').value = convertToLocalTime(discussionData.scheduledTime);
+        document.getElementById('discussionDescription').value = discussionData.description;
+        document.getElementById('discussionType').value = discussionData.discussionType || 'decision-making';
+
+        generateQuestions();
+        setTimeout(() => {
+            prefillQuestions(discussionData.questions);
+        }, 500);
+
+    } catch (error) {
+        console.error("Error fetching discussion details:", error);
+        showAlert("❌ Error loading discussion details.", 'error');
+    }
+}
+
+function convertToUTC(localDateTime) {
+    if (!localDateTime) return "";
+    const date = new Date(localDateTime);
+    return date.toISOString(); // This correctly converts to UTC format
+}
+
+function convertToLocalTime(utcDateTime) {
+    if (!utcDateTime) return "";
+    const date = new Date(utcDateTime);
+    // Format as YYYY-MM-DDTHH:mm in local time
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function prefillQuestions(questions) {
+    const container = document.getElementById('questionsContainer');
+    if (!container) {
+        console.error("❌ questionsContainer element not found.");
+        return;
+    }
+
+    if (!questions || questions.length === 0) {
+        console.warn("⚠️ No questions received.");
+        return;
+    }
+
+    console.log("🔹 Prefilling questions:", questions);
+
+    // Create a map of existing questions for easy lookup
+    const existingQuestions = Array.from(container.querySelectorAll('.question-container'));
+    const existingQuestionMap = new Map();
+    existingQuestions.forEach(questionDiv => {
+        const questionId = questionDiv.getAttribute('data-question-id');
+        existingQuestionMap.set(questionId, questionDiv);
+    });
+
+    // Clear only the questions that are no longer needed
+    existingQuestions.forEach(questionDiv => {
+        const questionId = questionDiv.getAttribute('data-question-id');
+        if (!questions.some(q => q.id == questionId)) {
+            questionDiv.remove(); // Remove questions that are not in the new list
+        }
+    });
+
+    // Add or update questions in the correct order
+    questions.forEach((question, index) => {
+        let questionDiv = existingQuestionMap.get(question.id.toString());
+
+        if (!questionDiv) {
+            // Create a new question container if it doesn't exist
+            questionDiv = document.createElement('div');
+            questionDiv.classList.add('question-container');
+            questionDiv.setAttribute('data-question-id', question.id); // Set question ID
+            container.appendChild(questionDiv);
+        }
+
+        // Update question text and position
+        questionDiv.innerHTML = `
+            <div class="question-controls d-flex align-items-center justify-content-between">
+                <div class="move-buttons">
+                    <button class="btn btn-sm btn-secondary move-up" onclick="moveQuestionUp(this)">▲</button>
+                    <button class="btn btn-sm btn-secondary move-down" onclick="moveQuestionDown(this)">▼</button>
+                </div>
+                <select class="form-select form-select-sm options-count" style="width: 75px;" title="Persisting Options Count">
+                    ${[0, 1, 2, 3, 4, 5].map(n => `
+                        <option value="${n}" ${n === question.persistingOptionsCount ? 'selected' : ''}>${n}</option>
+                    `).join('')}
+                </select>
+                <button class="btn btn-sm btn-danger delete-question ms-1" onclick="deleteQuestion(this)">✖</button>
+            </div>
+
+            <input type="text" class="input-box question" placeholder="Enter question ${index + 1}" value="${question.questionText}">
+            <div class="options-container"></div>
+            <button class="add-btn" onclick="addOption(this)">Add Option</button>
+        `;
+
+        // Add options for the question
+        const optionsContainer = questionDiv.querySelector('.options-container');
+        if (question.options && question.options.length > 0) {
+            question.options.forEach(option => {
+                // Ensure option is a string and properly escaped
+                const safeOption = String(option).replace(/"/g, '&quot;');
+                const optionDiv = document.createElement('div');
+                optionDiv.classList.add('option-entry');
+                optionDiv.innerHTML = `
+                    <input type="text" class="input-box option" value="${safeOption}">
+                    <button class="remove-btn" onclick="removeOption(this)">Remove</button>
+                `;
+                optionsContainer.appendChild(optionDiv);
+            });
+        }
+    });
+}
+
+function highlightError(fieldId, errorMessage) {
+    showAlert(errorMessage, 'error');
+    const input = document.getElementById(fieldId);
+    input.focus();
+    input.classList.add('error-highlight');
+    input.addEventListener('input', () => input.classList.remove('error-highlight'), { once: true });
+}
+
+function getDiscussionIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('discussionId'); // Extracts ?discussionId=
+}
+
+async function updateDiscussion() {
+    console.log("🔹 updateDiscussion() triggered!");
+
+    // Get input values
+    let discussionName = document.getElementById("discussionName").value.trim();
+    let numParticipants = parseInt(document.getElementById("numParticipants").value) || 0;
+    let numQuestions = parseInt(document.getElementById("numQuestions").value) || 0;
+    let scheduledTime = document.getElementById("scheduledTime").value.trim();
+    let discussionDescription = document.getElementById("discussionDescription").value.trim();
+    let discussionType = document.getElementById("discussionType").value;
+
+    // Validate required fields
+    if (!discussionName) {
+        highlightError("discussionName", "Please enter a discussion name.");
+        return;
+    }
+
+    if (!scheduledTime) {
+        showAlert("Scheduled time is required.", 'error');
+        document.getElementById("scheduledTime").focus();
+        return;
+    }
+
+    let scheduledTimestr = new Date(scheduledTime);
+    let now = new Date();
+    if (scheduledTimestr < now) {
+        highlightError("scheduledTime", "Please select a valid scheduled time.");
+        return;
+    }
+
+    if (numParticipants <= 0) {
+        highlightError("numParticipants", "Please enter a valid number of participants.");
+        return;
+    }
+
+    // Convert scheduledTime to ISO format if needed
+    try {
+        scheduledTime = new Date(scheduledTime).toISOString();
+    } catch (error) {
+        alert("❌ Invalid scheduled time format.");
+        return;
+    }
+
+    // Validate if there are at least one question
+    if (numQuestions === 0) {
+        highlightError("numQuestions", "Please add at least one valid question.");
+        return;
+    }
+
+    if (!validateAllQuestions()) {
+        return; // validateAllQuestions shows its own alerts
+    }
+
+    // Confirm with user before proceeding
+    let confirmation = confirm("Are you sure you want to update this discussion?");
+    if (!confirmation) return;
+
+    let discussionId = getDiscussionIdFromURL();
+    if (!discussionId) {
+        alert("❌ Error: Invalid discussion ID.");
+        return;
+    }
+
+    // Gather questions and options
+    let questions = [];
+    document.querySelectorAll(".question-container").forEach((questionContainer, index) => {
+        let questionText = questionContainer.querySelector(".question").value.trim();
+        let questionId = questionContainer.getAttribute("data-question-id");
+        questionId = questionId ? parseInt(questionId) : null; // Ensure correct type
+
+        let options = [];
+        questionContainer.querySelectorAll(".option").forEach(opt => {
+            let optionValue = opt.value.trim();
+            if (optionValue !== "") {
+                options.push(optionValue); // Send just the option value as a string
+            }
+        });
+
+        let persistingOptionsCount = parseInt(
+            questionContainer.querySelector(".options-count")?.value
+        ) || 3;
+
+        // Only include valid questions with at least one option
+        if (questionText && options.length > 0) {
+            questions.push({
+            id: questionId,
+            questionText: questionText,
+            position: index,
+            options: options,
+            persistingOptionsCount: persistingOptionsCount
+        });
+        }
+    });
+
+    // Prepare data for the request
+    let discussionData = {
+        discussionName: discussionName,
+        numberOfParticipants: numParticipants,
+        numberOfQuestions: questions.length,
+        scheduledTime: scheduledTime,
+        description: discussionDescription,
+        discussionType: discussionType,
+        questions: questions
+    };
+
+    console.log("🔹 Sending Update Request with Data:", discussionData);
+
+    try {
+        let response = await fetch(`/discussions/update/${discussionId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(discussionData)
+        });
+
+        console.log("🔹 Response received:", response);
+
+        if (!response.ok) {
+            let errorText = await response.text();
+            throw new Error(`HTTP Error ${response.status}: ${errorText}`);
+        }
+
+        let data = await response.json();
+        console.log("🔹 Server Response Data:", data);
+
+        if (data.error) {
+            alert("❌ Error: " + data.error);
+        } else {
+            alert("✅ Discussion updated successfully!");
+            setTimeout(() => window.location.href = "/past", 1000);
+        }
+    } catch (error) {
+        console.error("❌ Update failed:", error);
+        alert("❌ Failed to update discussion. Please try again.");
+    }
+}
+
+// Helper function to validate all questions
+function validateAllQuestions() {
+    const questionContainers = document.querySelectorAll('.question-container');
+
+    // Validate each question
+    for (let i = 0; i < questionContainers.length; i++) {
+        const container = questionContainers[i];
+        const questionInput = container.querySelector('.question');
+        const options = container.querySelectorAll('.option');
+
+        // Validate question text
+        if (!questionInput.value || questionInput.value.trim() === '') {
+            showAlert(`Question ${i + 1} cannot be empty.`, 'error');
+            questionInput.focus();
+            questionInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        // Validate options (need at least 2)
+        const validOptions = Array.from(options).filter(opt => opt.value.trim() !== '');
+        if (validOptions.length < 2) {
+            showAlert(`Every Question must have at least 2 options.`, 'error');
+            return false;
+        }
+    }
+
+    return true;
+}
+
+</script>
+</body>
+</html>

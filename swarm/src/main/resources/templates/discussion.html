@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swarm AI Interface</title>
+  <style>
+    * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+    }
+    .container {
+        display: flex;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        min-width: 100vw; /* Prevent shrinking below viewport */
+        min-height: 100vh; /* Prevent shrinking below viewport */
+        max-width: 100%;
+        background: linear-gradient(135deg, #2e7d32, #0288d1);
+        padding: 5px;
+        position: relative; /* Helps with child positioning */
+        box-sizing: border-box; /* Include padding in dimensions */
+        overflow: auto; /* Add scroll if content overflows */
+    }
+    /* Header Section */
+    .header {
+        display: grid;
+        grid-template-columns: 1fr 0.99fr 2.019fr;
+        gap: 10px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .header div {
+        padding: 15px;
+        border: 1px solid #d1d7dc;
+        display: flex; /* Add this */
+        border-radius: 8px;
+        background: #faf9f6;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        color: #2d3748;
+        align-items: center; /* Add this to vertically center the text */
+        justify-content: center; /* Add this to horizontally center the text */
+    }
+    /* Middle Section */
+    .middle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+        flex-grow: 1;
+    }
+    /* Left Half - Circle */
+    /* Circle Container */
+    .circle-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #e1e4e8;
+        padding: 20px;
+        height: 100%;
+        min-height: 0;
+        background-color: rgba(76, 175, 80, 0.05);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .circle {
+        width: 100%;
+        max-width: 500px;
+        aspect-ratio: 1;
+        position: relative;
+    }
+
+    /* Circle Background Shape */
+    .circle-background {
+        width: 100%;
+        height: 100%;
+        background-color: #fefefa;
+        border-radius: 50%;
+        border: 2px solid rgba(76, 175, 80, 0.3);
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    /* Consensus center circle label */
+    .consensus-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 110px;
+        height: 110px;
+        background: #ffffff;
+        border: 3px solid #4CAF50;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+        font-weight: 700;
+        color: #2E7D32;
+        text-align: center;
+        padding: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .consensus-label.hot {
+        border-color: #ff9800;
+        box-shadow: 0 0 12px rgba(255,152,0,0.6);
+    }
+
+
+    /* Circle Points - base styles */
+    .circle-point {
+        width: 40px;
+        height: 40px;
+        background-color: #4CAF50;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 2;
+        border: 2px solid white;
+        --radius: 625%;
+        --angle: 0deg;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform:
+            translate(-50%, -50%)
+            rotate(var(--angle))
+            translateY(calc(-1 * var(--radius)))
+            rotate(calc(-1 * var(--angle)));
+    }
+
+    /* Position each point at 60° intervals */
+    .circle-point.top { --angle: 30deg; }
+    .circle-point.top-right { --angle: 90deg; }
+    .circle-point.bottom-right { --angle: 150deg; }
+    .circle-point.bottom { --angle: 210deg; }
+    .circle-point.bottom-left { --angle: 270deg; }
+    .circle-point.top-left { --angle: 330deg; }
+
+    /* Puck icon */
+    .puck-icon {
+        font-size: 27px;
+        line-height: 1;
+        pointer-events: none;
+    }
+    .swarm-puck {
+        transition: transform 0.3s ease-out;
+    }
+
+    #puck-mover {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      border: 3px solid #4CAF50;
+      top: 0;
+      left: 0;
+      transform: translate(-50%, -50%);
+      transition: transform 0.2s ease-out;
+      z-index: 4;
+
+      /* ✅ Center the icon inside */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Center Point */
+    .circle-point.center {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 3px solid #4CAF50;
+        font-size: 22px;
+        z-index: 3;
+        transform: translate(-50%, -50%);
+        transition: transform 0.3s ease-out;
+    }
+
+    /* Option Labels */
+    .circle-label {
+        position: absolute;
+        background-color: white;
+        padding: 5px 8px;
+        border-radius: 15px;
+        border: 1px solid #4CAF50;
+        font-size: 13px;
+        font-weight: 500;
+        max-width: 300px;
+        white-space: normal;           /* Allow wrapping */
+        word-wrap: break-word;         /* Break long words */
+        overflow-wrap: break-word;     /* Modern equivalent */
+        z-index: 4;
+        color: #2E7D32;
+        text-align: center;
+        display: none; /* Hidden by default */
+        --label-radius: 1100%;
+        --angle: 0deg;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Show label on point hover */
+    .circle-point.top:hover ~ .circle-label.top,
+    .circle-point.top-right:hover ~ .circle-label.top-right,
+    .circle-point.bottom-right:hover ~ .circle-label.bottom-right,
+    .circle-point.bottom:hover ~ .circle-label.bottom,
+    .circle-point.bottom-left:hover ~ .circle-label.bottom-left,
+    .circle-point.top-left:hover ~ .circle-label.top-left {
+        display: inline-block;
+    }
+
+    /* Right Half - Confidence Slider and Chatroom */
+    .right-half {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        height: 100%; /* Add this to ensure it takes full height */
+        min-height: 0;
+        max-width: 750px;
+    }
+
+    /* Confidence Slider Container */
+    .confidence-slider {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        border: 1px solid green;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.77);
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        max-height: 80vh;
+        max-width: 750px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+    }
+
+    /* Scale container */
+    .scale-container {
+        margin-bottom: 15px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    /* Scale numbers */
+    .scale {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 33px; /* Match slider container padding */
+        margin: 0 -9.5px; /* Counteract padding for perfect alignment */
+        width: calc(100% + 16px); /* Adjust width to account for padding */
+        font-size: 11.9px;
+        color: #666;
+        margin-bottom: 3px;
+    }
+
+    /* Slider content container */
+    .slider-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+        gap: 12px;
+    }
+
+    /* Options container */
+    .options-container {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Option group */
+    .option-group {
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    /* Option label */
+    .option-label {
+        color: #2d3748;
+        margin: 10px 0;
+        font-size: 15px;
+        max-width: 750px;
+        white-space: normal;           /* Allow wrapping */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Scrollable options area */
+    .scrollable-options {
+        flex: 1;
+        overflow-y: auto; /* Enable scrolling */
+        padding: 0 15px; /* Side padding only */
+        max-height: 300px;
+    }
+
+    /* Slider container */
+    .slider-container {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    /* Slider styling */
+    .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 4px;
+        background: #e2e8f0;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .slider:hover {
+        background: #cbd5e1;
+    }
+    .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #4CAF50, #43a047);
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
+        transition: all 0.2s ease;
+        border: 2px solid white;
+    }
+    .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 3px 8px rgba(76, 175, 80, 0.5);
+    }
+    .slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #4CAF50, #43a047);
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: 2px solid white;
+    }
+
+    /* Submit button */
+    .submit-button {
+        padding: 8px 10px;
+        position: sticky;
+        bottom: 0;
+        text-align: center;
+        z-index: 1;
+    }
+    .submit-button button {
+        padding: 10px 100px;
+        background-color: green;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .submit-button button:hover {
+        background-color: #3e8d40;
+        transform: translateY(-1px);
+    }
+
+    .slider-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .value-label {
+      position: absolute;
+      top: -25px;
+      left: 0;
+      transform: translateX(-50%);
+      background: #4CAF50;
+      color: white;
+      padding: 2px 6px;
+      font-size: 12px;
+      border-radius: 4px;
+      pointer-events: none;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .value-label.visible {
+      opacity: 1;
+    }
+
+    .popup-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Chatroom specific styles */
+    .chat-container {
+        font-family: Arial, sans-serif;
+        border: 1px solid green;
+        padding: 10px;
+        margin: 0; /* Changed from auto to 0 to fill parent */
+        background: rgba(255, 255, 255, 0.77);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0; /* Important for flex children */
+        height: 300px; /* Fixed height for chat container */
+        box-sizing: border-box; /* Include padding in height calculation */
+        position: relative; /* For proper scrolling containment */
+        border-radius: 12px;
+    }
+    #messageArea {
+        flex: 1 1 auto; /* Take remaining space */
+        overflow-y: auto; /* Changed from scroll to auto */
+        padding: 10px;
+        list-style: none;
+        margin: 0 0 15px 0;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        height: 100px; /* Adjust this to control the chat message display area */
+    }
+    #messageForm {
+        flex: 0 0 auto; /* Won't grow or shrink */
+        display: flex;
+        padding: 0;
+        border-top: none; /* Removed since we have container border */
+    }
+    #message {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background: #faf9f6;
+        transition: all 0.2s ease;
+    }
+    button {
+        background: green;
+        color: white;
+        border: black 1px solid;
+        padding: 10px 20px;
+        margin-left: 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.3s;
+    }
+    button:hover {
+        background: #3e8d40;
+    }
+
+    .my-message {
+        background-color: #d4edda; /* Light green */
+        text-align: right;
+        align-self: flex-end;
+        border-right: 3px solid #4CAF50;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 4px;
+    }
+
+    .chat-message {
+        background-color: #f1f1f1; /* Light gray */
+        text-align: left;
+        align-self: flex-start;
+        border-left: 3px solid #a0a0a0;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 4px;
+    }
+
+    /* System Message Styles */
+    .system-message {
+        text-align: center;
+        background-color: #ADD8E6;
+        border-right: 3px solid #00008B;
+        border-left: 3px solid #00008B;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        border-radius: 4px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .middle {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .popup-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 30%;
+        padding: 20px;
+        background: white;
+        border: 2px solid black;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        z-index: 9999; /* Ensure it's on top */
+        border-radius: 10px;
+        max-width = '400px';
+    }
+
+    /* Prevent interaction with the background */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Question box truncated to 2 lines */
+    .question-box {
+        position: relative; /* anchor tooltip positioning */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        max-height: 3em;
+        cursor: pointer;
+        max-width: 750px;
+    }
+
+    /* Tooltip hidden by default */
+    .question-tooltip {
+        position: absolute;
+        top: 60px; /* directly below the question box */
+        left: 800px;
+        margin-top: 6px;
+        padding: 8px 12px;
+        background: #e6ffed !important; /* light green */
+        border: 1px solid #a3d9a5;
+        border-radius: 6px;
+        white-space: normal;           /* Allow wrapping */
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: max-content;
+        max-width: 700px;
+        box-shadow: 0px 2px 6px rgba(0,0,0,0.15);
+        display: none !important; /* ensure hidden by default */
+        z-index: 100;
+    }
+
+    /* Show tooltip only when hovered */
+    .question-box:hover + .question-tooltip {
+        display: block !important;
+    }
+
+    .wait-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .wait-overlay-content {
+      background: rgba(20, 20, 20, 0.9);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 500px;
+    }
+
+    #submitBtn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div id="descriptionBox" onclick="showDescriptionPopup()"
+         style="cursor: pointer; color: #2d3748; background: #ffffff;">
+      Description
+    </div>
+    <!-- Description Popup -->
+    <div id="descriptionPopup"
+         style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+
+      <div class="popup-content"
+           onclick="event.stopPropagation()"
+           style="background: white; border: 2px solid green; padding: 20px;
+              position: absolute; top: 50%; left: 50%;
+              transform: translate(-50%, -50%); width: 300px; text-align: center;">
+
+        <!-- Description Text -->
+        <p id="popupDescriptionText" style="margin-bottom: 15px;">No description available.</p>
+
+        <!-- Close Button -->
+        <button onclick="closePopup()"
+                style="padding: 10px 15px; background-color: green;
+                   color: white; border: none; border-radius: 3px; cursor: pointer;">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <div id="timer-box">Timer</div>
+
+    <div id="questionTextBox" class="question-box">
+      Question will appear here
+    </div>
+    <div id="fullquestionTextBox" class="question-tooltip">
+      Full question will appear here
+    </div>
+  </div>
+
+  <!-- Middle Section -->
+  <div class="middle">
+    <!-- Left Half - Circle -->
+    <div class="circle-container">
+      <div class="circle">
+        <!-- Circle Background -->
+        <div class="circle-background">
+          <!-- SVG sectors will render below, positioned absolutely -->
+          <svg id="consensus-svg" viewBox="0 0 500 500" width="100%" height="100%" style="position:absolute; top:0; left:0;">
+            <defs id="grad-defs"></defs>
+            <g id="sectors"></g>
+            <!-- Central masking circle to keep a clean inner area if needed -->
+          </svg>
+        </div>
+
+        <!-- Consensus Center Label -->
+        <div class="consensus-label">CONSENSUS</div>
+
+        <!-- Circle Points -->
+        <div class="circle-point top">1</div>
+        <div class="circle-point top-right">2</div>
+        <div class="circle-point bottom-right">3</div>
+        <div class="circle-point bottom">4</div>
+        <div class="circle-point bottom-left">5</div>
+        <div class="circle-point top-left">6</div>
+
+        <!-- Option Labels -->
+        <div class="circle-label top">Option 1</div>
+        <div class="circle-label top-right">Option 2</div>
+        <div class="circle-label bottom-right">Option 3</div>
+        <div class="circle-label bottom">Option 4</div>
+        <div class="circle-label bottom-left">Option 5</div>
+        <div class="circle-label top-left">Option 6</div>
+      </div>
+    </div>
+
+    <!-- Right Half - Confidence Slider and Chatroom -->
+    <div class="right-half">
+      <div class="confidence-slider">
+        <div class="scale-container">
+          <div class="scale">
+            <span>0</span><span>10</span><span>20</span><span>30</span>
+            <span>40</span><span>50</span><span>60</span><span>70</span>
+            <span>80</span><span>90</span><span>100</span>
+          </div>
+        </div>
+
+        <div class="scrollable-options">
+          <div class="options-container" id="optionsContainer">
+            <!-- Option 1 -->
+            <div class="option-group">
+              <div class="option-label">Option 1</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 2 -->
+            <div class="option-group">
+              <div class="option-label">Option 2</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 3 -->
+            <div class="option-group">
+              <div class="option-label">Option 3</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 4 -->
+            <div class="option-group">
+              <div class="option-label">Option 4</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 5 -->
+            <div class="option-group">
+              <div class="option-label">Option 5</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Option 6 -->
+            <div class="option-group">
+              <div class="option-label">Option 6</div>
+              <div class="slider-container">
+                <div class="slider-wrapper">
+                  <input type="range" min="0" max="100" value="0" class="slider" oninput="updateValueLabel(this)">
+                  <div class="value-label">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="submit-button">
+            <button id="submitBtn" onclick="submitResponses()">Submit</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-container">
+        <ul id="messageArea"></ul>
+        <form id="messageForm">
+          <input type="text" id="message" placeholder="Type your message..." autocomplete="off" />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Waiting Room Overlay -->
+<div id="waiting-overlay" class="wait-overlay">
+  <div class="wait-overlay-content">
+    <h2>⏳ Waiting Room</h2>
+    <p id="waiting-message">The session will start at scheduled time...</p>
+    <p class="instructions">
+      <br>
+      Do not refresh, leave or go back from this page.<br><br>
+      If you do, you will be permanently out of the session.
+    </p>
+    <p id="waiting-countdown"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+
+  // To show the slider readings while sliding
+
+  function updateValueLabel(slider) {
+    // Find the value label in the parent wrapper
+    const wrapper = slider.closest('.slider-wrapper');
+    const valueLabel = wrapper.querySelector('.value-label');
+
+    // Update the label text
+    valueLabel.textContent = slider.value;
+
+    // Constraint only if decision-making
+    if (discussionType === "decision-making") {
+        enforceDecisionMakingConstraint(slider);
+    }
+
+    // Calculate the thumb position
+    const min = parseFloat(slider.min) || 0;
+    const max = parseFloat(slider.max) || 100;
+    const range = max - min;
+    const percent = (slider.value - min) / range;
+
+    // Get the slider width and calculate position
+    const sliderWidth = slider.offsetWidth;
+    const thumbWidth = 18; // Estimate of thumb width (adjust if needed)
+
+    // This calculates the center of the thumb
+    const thumbPosition = percent * (sliderWidth - thumbWidth) + (thumbWidth / 2);
+
+    // Center the label above the thumb by using transform
+    valueLabel.style.left = thumbPosition + 'px';
+    valueLabel.style.transform = 'translateX(-50%)';
+
+    // Make the label visible
+    valueLabel.classList.add('visible');
+
+    // Hide the label after sliding stops (after 1 second)
+    clearTimeout(slider.labelTimeout);
+    slider.labelTimeout = setTimeout(() => {
+        valueLabel.classList.remove('visible');
+    }, 1000);
+  }
+
+  function enforceDecisionMakingConstraint(changedSlider) {
+      const sliders = document.querySelectorAll('.slider-wrapper input[type="range"]');
+
+      // Calculate total sum across all sliders
+      let total = 0;
+      sliders.forEach(s => total += parseInt(s.value) || 0);
+
+      // If sum exceeds 100, adjust the changed slider back
+      if (total > 100) {
+          const excess = total - 100;
+          changedSlider.value = Math.max(parseInt(changedSlider.value) - excess, changedSlider.min);
+
+          // Also update the label to reflect the adjusted value
+          const valueLabel = changedSlider.closest('.slider-wrapper').querySelector('.value-label');
+          valueLabel.textContent = changedSlider.value;
+      }
+  }
+
+  function setupWaitingOverlay(scheduledTimeStr) {
+    const overlay = document.getElementById("waiting-overlay");
+    const countdownBox = document.getElementById("waiting-countdown");
+    const waitingMsg = document.getElementById("waiting-message");
+
+    // Parse backend UTC string into Date
+    const scheduledDate = new Date(scheduledTimeStr);
+
+    // Add +1 min grace period
+    const sessionStartTime = new Date(scheduledDate.getTime() + 60 * 1000);
+
+    // Show start time in local user timezone
+    waitingMsg.textContent = `Session starts exactly at: ${sessionStartTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+
+    const interval = setInterval(() => {
+        const now = new Date();
+        const diff = sessionStartTime - now;
+
+        if (diff <= 0) {
+            clearInterval(interval);
+            overlay.style.display = "none"; // close popup
+            initializeQuestion();           // 🔥 Start session
+        } else {
+            const seconds = Math.floor(diff / 1000);
+            countdownBox.textContent = `Starting in ${seconds} seconds...`;
+        }
+    }, 1000);
+  }
+
+
+  window.onload = async function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const discussionId = urlParams.get("discussionId");
+
+    if (discussionId) {
+        await loadDiscussionDetails(discussionId);
+    }
+  };
+
+  let questionIndex = 0;
+  let optionDisplayIndex = 0;
+  let currentQuestionOptions = [];
+  let discussionData = null;
+  let countdownInterval = null;
+  let currentQuestion = null;
+  let isLastRound = false;
+  let popupAlreadyShown = false;
+  let discussionType = null;
+  let scheduledTime = null; // It is in UTC format "2025-08-31T13:30:00Z", so use it correctly here
+  let converged = false; // default false, used for timer and puck
+  const ROUND_DURATION = 300; // later change to 300 for 5 min
+  let roundNumber = 1;
+  let popupActive = false; // To Prevent puck updates during popup
+
+  async function loadDiscussionDetails(discussionId) {
+      try {
+          const response = await fetch(`http://localhost:8080/session/discussion-details?discussionId=${discussionId}`);
+          const result = await response.json();
+
+          if (response.ok) {
+              discussionData = result; // Store the entire discussion data
+
+              // Set up popup description
+              const popupDescriptionText = document.getElementById("popupDescriptionText");
+              if (popupDescriptionText) {
+                  popupDescriptionText.innerText = result.description || "No description available.";
+              }
+
+              discussionType = result.discussionType;
+              scheduledTime = result.scheduledTime;
+
+              // ✅ Show waiting overlay before starting questions
+              setupWaitingOverlay(scheduledTime);
+
+          } else {
+              alert(result.error || "Failed to load discussion details.");
+          }
+      } catch (error) {
+          console.error("Error fetching discussion details:", error);
+          alert("❌ Error fetching discussion details. Please try again.");
+      }
+  }
+
+  // Global async function to get answer text for a round
+  async function getAnswerTextForRound(question) {
+      const questionId = question.id;
+      try {
+          const response = await fetch(`http://localhost:8080/session/answer?questionId=${questionId}`);
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          return await response.text();
+      } catch (error) {
+          console.error('Error fetching answer:', error);
+          return "Answer not available"; // Fallback text
+      }
+  }
+
+
+  async function selectOptionsForRound(allOptions, currentQuestionOptions, optionDisplayIndex) {
+      // First round: show first 6 options
+      if (optionDisplayIndex === 0) {
+          return allOptions.slice(0, 6);
+      }
+
+      // Subsequent rounds for questions with >6 options
+      if (allOptions.length > 6) {
+          try {
+              // Fetch persisted options (could be 2 or 3)
+              const response = await fetch(`http://localhost:8080/session/top-options?questionId=${currentQuestion.id}&roundNumber=${roundNumber}`);
+              if (!response.ok) throw new Error('Network error');
+              const persistedOptions = await response.json();
+              const persistCount = persistedOptions.length;
+
+              // Calculate progress: 6 (initial) + (rounds-1)*newOptionsPerRound
+              const lastRoundEnd = 6 + ((optionDisplayIndex - 1) * (6 - persistCount));
+
+              // Get next dynamic chunk
+              const nextOptions = allOptions.slice(
+                  lastRoundEnd,
+                  Math.min(lastRoundEnd + (6 - persistCount), allOptions.length)
+              );
+
+              return [...persistedOptions, ...nextOptions];
+          } catch (error) {
+              console.error('Error fetching persisted options:', error);
+              return allOptions.slice(0, 6); // Fallback
+          }
+      }
+      return allOptions;
+  }
+
+  async function initializeQuestion() {
+      currentQuestion = discussionData.questions[questionIndex];
+      const allOptions = currentQuestion.options;
+
+      if (optionDisplayIndex === 0) {
+          // First round of a first question
+          currentQuestionOptions = allOptions.slice(0, 6);
+      }
+      else {
+          // Get persist count dynamically (matches selectOptionsForRound)
+          const persistCount = currentQuestion.persistingOptionsCount;
+          const newOptionsPerRound = 6 - persistCount;
+          const startIndex = 6 + ((optionDisplayIndex - 1) * newOptionsPerRound);
+
+          if (startIndex >= allOptions.length) {
+            // Move to next question
+            questionIndex++;
+            optionDisplayIndex = 0;
+            roundNumber = 1;
+
+            if (questionIndex < discussionData.questions.length) {
+                // Set currentQuestion to the next question
+                currentQuestion = discussionData.questions[questionIndex];
+                currentQuestionOptions = currentQuestion.options.slice(0, 6);
+
+                // optionDisplayIndex remains 0, will be incremented later
+            }
+          }
+          else {
+              // Continue with current question, next round
+              currentQuestionOptions = await selectOptionsForRound(
+                  allOptions,
+                  currentQuestionOptions || [],
+                  optionDisplayIndex
+              );
+
+              roundNumber++;
+          }
+      }
+
+      // Start Timer for this round
+      startTimer()
+
+      // UI updates
+      updateUIForRound();
+
+      // Last-round check (dynamic)
+      const persistCount = currentQuestion.persistingOptionsCount;
+      isLastRound = questionIndex === discussionData.questions.length - 1 &&
+                   (6 + (optionDisplayIndex * (6 - persistCount))) >= allOptions.length;
+
+      optionDisplayIndex++;
+  }
+
+  // Extracted UI updates
+  function updateUIForRound() {
+      if (questionIndex === 0 && optionDisplayIndex === 0) {
+          displayMessage("What is your preference and why? Let's Discuss Collectively", false, true);
+          displayMessage("Question 1", false, true);
+          displayMessage("Round 1", false, true);
+      } else if (optionDisplayIndex === 0) {
+          // First round of subsequent questions
+          sendSystemMessage(`Question ${questionIndex + 1}`);
+          sendSystemMessage(`Round 1`);
+      } else {
+          sendSystemMessage(`Round ${optionDisplayIndex + 1}`);
+      }
+      displayQuestion(currentQuestion);
+      displayOptions(currentQuestionOptions);
+  }
+
+  // Timer
+  let roundTimer = null;
+  let roundEndTime = null;
+
+  function startTimer() {
+    // Clear old timer if still running
+    if (roundTimer) clearInterval(roundTimer);
+
+    popupAlreadyShown = false;
+
+    // ✅ Set round end time based on current time
+    roundEndTime = Date.now() + ROUND_DURATION * 1000;
+
+    const timerBox = document.getElementById("timer-box");
+
+    roundTimer = setInterval(() => {
+        // ✅ Compute time left from actual system clock
+        let timeLeft = Math.max(0, Math.floor((roundEndTime - Date.now()) / 1000));
+
+        // ✅ If convergence happened → end immediately
+        if (converged) {
+            timeLeft = 0;
+            converged = false; // reset for next round
+        }
+
+        // ✅ Format MM:SS
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+        // ✅ Update timer display
+        if (timeLeft > 0) {
+          timerBox.textContent = `Time Left: ${formattedTime}`;
+        } else {
+          timerBox.textContent = "Time Left: 0:00";
+        }
+
+        // Round end handling
+        if (timeLeft === 0) {
+            if (!popupAlreadyShown) {
+                popupAlreadyShown = true;
+
+                if (isLastRound) {
+                    showFinalPopup();
+                } else {
+                    showRoundAnswerPopup();
+                }
+            }
+
+            clearInterval(roundTimer); // stop timer
+            roundTimer = null;
+        }
+    }, 1000);
+  }
+
+  async function showRoundAnswerPopup() {
+
+    popupActive = true; // 🚫 Lock strength updates during popup
+
+    const overlay = document.createElement("div");
+    overlay.classList.add("overlay");
+    document.body.appendChild(overlay);
+
+    const popup = document.createElement("div");
+    popup.classList.add("popup-container");
+
+    // Get answer text asynchronously
+    const answerText = await getAnswerTextForRound(currentQuestion);
+
+    popup.innerHTML = `
+        <p>Answer of this round: ${answerText}</p>
+        <br>
+        <p id="popup-timer">Next Round in 10</p>
+    `;
+    document.body.appendChild(popup);
+
+    // ✅ Set popup end time based on system clock
+    const popupDuration = 10; // seconds
+    const popupEndTime = Date.now() + popupDuration * 1000;
+
+    const popupInterval = setInterval(() => {
+        const remaining = Math.max(0, Math.floor((popupEndTime - Date.now()) / 1000));
+        const popupTimerElement = document.getElementById("popup-timer");
+
+        if (popupTimerElement) {
+            popupTimerElement.textContent = `Next Round in ${remaining}`;
+        }
+
+        if (remaining <= 0) {
+            clearInterval(popupInterval);
+
+            // Remove popup and overlay
+            if (document.body.contains(popup)) document.body.removeChild(popup);
+            if (document.body.contains(overlay)) document.body.removeChild(overlay);
+
+            popupActive = false; // ✅ Unlock puck updates AFTER popup closes
+
+            // Prepare for next round
+            initializeQuestion();
+        }
+    }, 500); // ✅ smaller interval so display is more responsive
+
+    updateSectorStrengths([0,0,0,0,0,0]); // new round
+  }
+
+  function displayQuestion(question) {
+      const questionTextBox = document.getElementById("questionTextBox");
+      const fullquestionTextBox = document.getElementById("fullquestionTextBox");
+      if (questionTextBox) {
+          questionTextBox.innerText = question.questionText;
+          fullquestionTextBox.innerText = question.questionText;
+      }
+  }
+
+  function displayOptions(options) {
+      const container = document.querySelector('.options-container');
+      if (!container) return;
+
+      // Clear existing options
+      container.innerHTML = '';
+
+      // Update Circle labels
+      const circleLabels = [
+          document.querySelector('.circle-label.top'),
+          document.querySelector('.circle-label.top-right'),
+          document.querySelector('.circle-label.bottom-right'),
+          document.querySelector('.circle-label.bottom'),
+          document.querySelector('.circle-label.bottom-left'),
+          document.querySelector('.circle-label.top-left')
+      ];
+
+      // Always display 6 option groups
+      for (let i = 0; i < 6; i++) {
+          // Create option group
+          const optionGroup = document.createElement('div');
+          optionGroup.classList.add('option-group');
+
+          // Create option label
+          const optionLabel = document.createElement('div');
+          optionLabel.classList.add('option-label');
+
+          // Create slider container
+          const sliderContainer = document.createElement('div');
+          sliderContainer.classList.add('slider-container');
+
+          // Create slider input
+          const sliderInput = document.createElement('input');
+          sliderInput.type = 'range';
+          sliderInput.min = '0';
+          sliderInput.max = '100';
+          sliderInput.value = '0';
+          sliderInput.classList.add('slider');
+
+          // Create slider wrapper and value label
+            const sliderWrapper = document.createElement('div');
+            sliderWrapper.classList.add('slider-wrapper');
+
+            const valueLabel = document.createElement('div');
+            valueLabel.classList.add('value-label');
+            valueLabel.textContent = '0';
+
+          // Handle option display
+          if (options[i]) {
+              optionLabel.textContent = options[i];
+              circleLabels[i].textContent = options[i];
+              sliderInput.disabled = false;
+          } else {
+              optionLabel.textContent = '-';
+              circleLabels[i].textContent = '-';
+              sliderInput.disabled = true;
+          }
+
+          // Add event listener for slider input
+          sliderInput.addEventListener('input', function() {
+              updateValueLabel(this);
+          });
+
+          // Build the DOM structure
+          sliderWrapper.appendChild(sliderInput);
+          sliderWrapper.appendChild(valueLabel);
+          sliderContainer.appendChild(sliderWrapper);
+          optionGroup.appendChild(optionLabel);
+          optionGroup.appendChild(sliderContainer);
+          container.appendChild(optionGroup);
+
+          // Initialize the value label position
+          updateValueLabel(sliderInput);
+      }
+  }
+
+  async function showFinalPopup() {
+      const overlay = document.createElement("div");
+      overlay.classList.add("overlay");
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100%';
+      overlay.style.height = '100%';
+      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+      overlay.style.zIndex = '1000';
+      overlay.style.display = 'flex';
+      overlay.style.justifyContent = 'center';
+      overlay.style.alignItems = 'center';
+
+      const popup = document.createElement("div");
+      popup.classList.add("popup-container");
+      popup.style.backgroundColor = 'white';
+      popup.style.padding = '20px';
+      popup.style.borderRadius = '10px';
+      popup.style.textAlign = 'center';
+      popup.style.maxWidth = '400px';
+      popup.style.width = '90%';
+
+      popupActive = true; // 🚫 Lock puck updates and don't have to unlock after this
+
+      // Get answer text asynchronously
+      const lastQuestion = discussionData.questions[discussionData.questions.length - 1];
+      const answerText = await getAnswerTextForRound(lastQuestion);
+
+      popup.innerHTML = `
+          <h2>Discussion Completed</h2>
+          <br>
+          <p>Answer of this round: ${answerText}</p>
+          <br>
+          <p>Thank you for participating.</p>
+      `;
+
+      // Prevent closing the popup
+      popup.style.pointerEvents = 'all';
+      overlay.style.pointerEvents = 'all';
+
+      // Disable all interactions beneath the popup
+      overlay.addEventListener('click', (e) => e.preventDefault());
+      popup.addEventListener('click', (e) => e.preventDefault());
+
+      overlay.appendChild(popup);
+      document.body.appendChild(overlay);
+  }
+
+
+  function showDescriptionPopup() {
+    document.getElementById("descriptionPopup").style.display = "block";
+  }
+
+  // Close popup when clicking anywhere outside the popup content
+  document.getElementById("descriptionPopup").addEventListener("click", closePopup);
+
+  function closePopup() {
+      document.getElementById("descriptionPopup").style.display = "none";
+  }
+
+
+
+  // Websocket connection
+
+  let stompClient = null;
+  const discussionId = new URLSearchParams(window.location.search).get('discussionId');
+  let lastSentMessage = null; // Store last sent message
+
+  function connectToWebSocket() {
+    const socket = new SockJS("/ws");
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+      console.log("✅ WebSocket Connected:", frame);
+
+      if (!discussionId) {
+        console.error("❌ Missing discussionId.");
+        return;
+      }
+
+      subscribeToChat();
+      subscribeToSectorStrengths();
+
+    }, function (error) {
+      console.error("❌ WebSocket Connection Error:", error);
+    });
+  }
+
+  // Chatroom
+
+  function subscribeToChat() {
+      const topic = `/topic/${discussionId}`;
+      console.log(`💬 Subscribed to chat: ${topic}`);
+
+      stompClient.subscribe(topic, function (message) {
+          const incomingMessage = message.body;
+
+          if (incomingMessage.startsWith("[SYSTEM]")) {
+              return;
+          }
+
+          // Check if this is the last sent message (by content only, not by player ID)
+          if (lastSentMessage && incomingMessage.endsWith(lastSentMessage)) {
+              displayMessage(incomingMessage, true);
+              lastSentMessage = null; // reset
+          } else {
+              displayMessage(incomingMessage, false);
+          }
+      });
+  }
+
+  function sendChatMessage(message) {
+      const destination = `/app/chat/${discussionId}/sendMessage`;
+      stompClient.send(destination, {}, message);
+      lastSentMessage = message;
+  }
+
+  // Function to display messages with different styling
+  function displayMessage(text, isMyMessage, isSystem = false) {
+      const li = document.createElement('li');
+      li.className = isSystem ? "system-message" : (isMyMessage ? "my-message" : "chat-message");
+      const [firstLine, ...restLines] = text.split('\n');
+      li.innerHTML = `<strong>${firstLine}</strong><br>${restLines.join('<br>')}`;
+      messageArea.appendChild(li);
+      messageArea.scrollTop = messageArea.scrollHeight;
+  }
+
+  function sendSystemMessage(message) {
+    displayMessage(message, false, true);
+  }
+
+  // Initialize the websocket connection
+  document.addEventListener("DOMContentLoaded", () => {
+    connectToWebSocket();
+    buildSectors();
+
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('message');
+
+    messageForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message || !stompClient || !stompClient.connected) return;
+      sendChatMessage(message);
+      messageInput.value = '';
+    });
+  });
+
+
+  // Websocket for Sliders
+  let lastSubmissionTime = 0;
+  const SUBMISSION_COOLDOWN = 500; // 0.5 seconds
+  // restricts to 1 submission per 0.5 seconds
+
+  function submitResponses() {
+
+    const now = Date.now();
+    const timeSinceLast = now - lastSubmissionTime;
+
+    if (timeSinceLast < SUBMISSION_COOLDOWN) {
+      return; // Ignore if within cooldown
+    }
+
+    const sliders = document.querySelectorAll('.slider');
+    const sliderValues = Array.from(sliders).map(slider => {
+      return slider.disabled ? 0 : parseFloat(slider.value);
+    });
+
+    if (sliderValues.length !== 6) {
+      alert("Something went wrong — not all 6 sliders detected.");
+      return;
+    }
+
+    console.log("Submitting slider data:", sliderValues);
+    const questionId = currentQuestion.id;
+    const roundNum = roundNumber;
+
+    const payload = {
+      discussionId: discussionId,
+      sliders: sliderValues,
+      optionLabels: currentQuestionOptions,
+      questionId: questionId,
+      roundNum: roundNumber
+    };
+
+    // Disable submit button temporarily
+    const submitBtn = document.getElementById("submitBtn");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add("disabled"); // Optional for styling
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove("disabled");
+      }, SUBMISSION_COOLDOWN);
+    }
+
+    // Send to WebSocket server
+    stompClient.send("/app/slider/submit", {}, JSON.stringify(payload));
+
+    // Record submission time
+    lastSubmissionTime = now;
+  }
+
+  let strengths = null;
+
+  // WebSocket subscription for sector strengths
+  function subscribeToSectorStrengths() {
+    const topic = `/topic/strengths/${discussionId}`;
+    console.log(`📡 Subscribing to sector strengths at: ${topic}`);
+    stompClient.subscribe(topic, function(message) {
+      try {
+        const data = JSON.parse(message.body);
+        console.log("Strengths Update:", data);
+
+        // Ignore puck updates while popup is active
+        if (popupActive) {
+            console.log("⚠️ Popup active — ignoring strengths update:", data);
+            return;
+        }
+        converged = data.converged;
+        strengths = data.strengths;
+        updateSectorStrengths(strengths);
+      } catch (e) {
+        console.warn('Invalid strengths payload', e);
+      }
+    });
+  }
+
+  // ======== Consensus Sectors (SVG) ========
+  const SECTOR_COUNT = 6;
+  const CENTER = { x: 250, y: 250 }; // viewBox center
+  const RADIUS = 240; // within 500x500 viewBox
+  const sectorColors = ['#4CAF50','#4CAF50','#4CAF50','#4CAF50','#4CAF50','#4CAF50'];
+
+  function polarToCartesian(cx, cy, r, angleDeg) {
+    const rad = (angleDeg - 90) * Math.PI / 180.0;
+    return { x: cx + (r * Math.cos(rad)), y: cy + (r * Math.sin(rad)) };
+  }
+
+  function describeSector(cx, cy, r, startAngle, endAngle) {
+    const start = polarToCartesian(cx, cy, r, endAngle);
+    const end = polarToCartesian(cx, cy, r, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+    return ['M', cx, cy, 'L', start.x, start.y, 'A', r, r, 0, largeArcFlag, 0, end.x, end.y, 'Z'].join(' ');
+  }
+
+  function buildSectors() {
+    const defs = document.getElementById('grad-defs');
+    const g = document.getElementById('sectors');
+    if (!defs || !g) return;
+    defs.innerHTML = '';
+    g.innerHTML = '';
+    for (let i = 0; i < SECTOR_COUNT; i++) {
+      const startAngle = i * 60;
+      const endAngle = (i + 1) * 60;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', describeSector(CENTER.x, CENTER.y, RADIUS, startAngle, endAngle));
+      const gradId = `sectorGrad${i}`;
+
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'radialGradient');
+      grad.setAttribute('id', gradId);
+      grad.setAttribute('cx', CENTER.x);
+      grad.setAttribute('cy', CENTER.y);
+      grad.setAttribute('r', RADIUS);
+      grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+
+      const stop0 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop0.setAttribute('offset', '0%');
+      stop0.setAttribute('stop-color', sectorColors[i]);
+      stop0.setAttribute('stop-opacity', '0');
+
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop1.setAttribute('offset', '80%'); // will be updated
+      stop1.setAttribute('stop-color', sectorColors[i]);
+      stop1.setAttribute('stop-opacity', '0');
+
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop2.setAttribute('offset', '85%'); // will be updated
+      stop2.setAttribute('stop-color', sectorColors[i]);
+      stop2.setAttribute('stop-opacity', '0.85');
+
+      const stop3 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop3.setAttribute('offset', '100%');
+      stop3.setAttribute('stop-color', sectorColors[i]);
+      stop3.setAttribute('stop-opacity', '0.9');
+
+      grad.appendChild(stop0); grad.appendChild(stop1); grad.appendChild(stop2); grad.appendChild(stop3);
+      defs.appendChild(grad);
+
+      path.setAttribute('fill', `url(#${gradId})`);
+      path.setAttribute('stroke', 'rgba(0,0,0,0.06)');
+      path.setAttribute('stroke-width', '1');
+      g.appendChild(path);
+    }
+    // initialize to zeros
+    updateSectorStrengths([0,0,0,0,0,0]);
+  }
+
+  function updateSectorStrengths(strengths) {
+    // strengths: array of 6 values in 0..100
+    if (!Array.isArray(strengths) || strengths.length !== 6) return;
+    const consensus = document.querySelector('.consensus-label');
+    let maxNorm = 0;
+    strengths.forEach((val, i) => {
+      const norm = val > 1 ? (val / 100) : 0;
+      maxNorm = Math.max(maxNorm, norm);
+      const threshold = Math.max(0, 1 - norm); // 0=full to center, 1=none
+      const grad = document.getElementById(`sectorGrad${i}`);
+      if (!grad) return;
+      const stops = grad.querySelectorAll('stop');
+      // stops[1] and stops[2] define the transition from transparent to color
+      const t1 = Math.min(0.99, threshold);
+      const t2 = Math.min(1, threshold + 0.08);
+      if (stops[1]) stops[1].setAttribute('offset', `${(t1*100).toFixed(1)}%`);
+      if (stops[2]) stops[2].setAttribute('offset', `${(t2*100).toFixed(1)}%`);
+    });
+    if (consensus) {
+      if (maxNorm >= 0.75) consensus.classList.add('hot'); else consensus.classList.remove('hot');
+    }
+  }
+
+
+  window.addEventListener("beforeunload", function (e) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const discussionId = urlParams.get("discussionId");
+
+    // Custom warning message (most browsers ignore custom text, but still works to block unload)
+    const confirmationMessage = "⚠️ If you proceed, you will be out of the game. Do you really want to leave?";
+
+    // Trigger browser’s default confirmation dialog
+    e.preventDefault();
+    e.returnValue = confirmationMessage;
+
+    // If user really proceeds (page unloads), beacon will fire
+    const params = new URLSearchParams();
+    params.append("discussionId", discussionId);
+    navigator.sendBeacon("/discussions/discussion/exit", params);
+
+    return confirmationMessage;
+  });
+
+</script>
+
+</body>
+</html>

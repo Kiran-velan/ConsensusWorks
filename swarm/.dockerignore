@@ -1,0 +1,40 @@
+# Build
+target/
+!target/*.jar
+.mvn/
+.mvnw
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Environment
+.env
+*.properties
+
+# Logs
+*.log
+logs/
+
+# System
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Docker files themselves
+Dockerfile
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+
+# Coverage reports
+coverage/
+*.gcov

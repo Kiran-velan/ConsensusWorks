@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer Portal | Swarm AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        :root {
+          --primary: #2e7d32;
+          --primary-dark: #1b5e20;
+          --secondary: #0288d1;
+          --accent: #ad1457;
+          --light: #f5f5f6;
+          --dark: #263238;
+          --gray: #607d8b;
+          --light-gray: #e0e0e0;
+          --white: #ffffff;
+        }
+
+        body {
+          font-family: 'Poppins', sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: var(--light);
+          color: var(--dark);
+          line-height: 1.6;
+        }
+
+        .header {
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
+          color: white;
+          padding: 50px 20px 10px;
+          text-align: center;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .header h1 {
+          margin: 0;
+          font-weight: 600;
+          font-size: 2.2rem;
+          position: relative;
+          z-index: 1;
+        }
+
+        .header-buttons-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          position: absolute;
+          top: 20px;
+          left: 40px;
+          right: 40px;
+          z-index: 10;
+        }
+
+        .left-buttons,
+        .right-buttons {
+          display: flex;
+          gap: 20px;
+        }
+
+        .button {
+          background-color: var(--primary);
+          color: white;
+          text-decoration: none;
+          padding: 8px 16px;
+          font-size: 1rem;
+          border-radius: 6px;
+          font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+          border: none;
+          cursor: pointer;
+        }
+
+        .button:hover {
+          background-color: var(--primary-dark);
+          transform: translateY(-1px);
+          box-shadow: 0 6px 10px rgba(46, 125, 50, 0.3);
+        }
+
+        .button.secondary {
+          background-color: var(--secondary);
+          box-shadow: 0 4px 6px rgba(2, 136, 209, 0.2);
+        }
+
+        .button.secondary:hover {
+          background-color: #0277bd;
+          box-shadow: 0 6px 10px rgba(2, 136, 209, 0.3);
+        }
+
+        .button.accent {
+          background-color: var(--accent);
+          box-shadow: 0 4px 6px rgba(173, 20, 87, 0.2);
+        }
+
+        .button.accent:hover {
+          background-color: #880e4f;
+          box-shadow: 0 6px 10px rgba(173, 20, 87, 0.3);
+        }
+
+        @media (max-width: 768px) {
+          .header-buttons-row {
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: static;
+            margin-bottom: 20px;
+          }
+          .left-buttons,
+          .right-buttons {
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+          .header h1 {
+            font-size: 2rem;
+          }
+          .header p {
+            font-size: 1rem;
+          }
+        }
+
+        .main-container {
+          max-width: 1100px;
+          margin: 40px auto;
+          padding: 0 20px;
+        }
+
+        .section {
+          margin-bottom: 60px;
+          background-color: var(--white);
+          border-radius: 12px;
+          padding: 30px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+          display: flex;
+          align-items: center;
+          margin-bottom: 20px;
+          gap: 15px;
+        }
+
+        .section-icon {
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 1.5rem;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+          color: var(--primary);
+          font-weight: 600;
+          font-size: 1.7rem;
+          margin: 0;
+        }
+
+        .section p {
+          font-size: 1.05rem;
+          color: var(--gray);
+          margin-bottom: 25px;
+          line-height: 1.6;
+        }
+
+        .demo-section {
+          text-align: center;
+          background: linear-gradient(135deg, #f5f5f6, #e8f5e9);
+          padding: 20px;
+          border-radius: 10px;
+          margin-bottom: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-section p {
+          font-size: 1rem;
+          margin-bottom: 25px;
+        }
+
+        .highlight {
+          color: var(--secondary);
+          font-weight: 600;
+          background-color: rgba(2, 136, 209, 0.1);
+          padding: 2px 8px;
+          border-radius: 4px;
+        }
+
+        .steps {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+
+        .steps li {
+          margin-bottom: 18px;
+          font-size: 1rem;
+          line-height: 1.6;
+          display: flex;
+          align-items: flex-start;
+          gap: 15px;
+          padding: 15px;
+          border-radius: 8px;
+          transition: background-color 0.2s ease;
+        }
+
+        .steps li:hover {
+          background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        .steps li i {
+          color: var(--secondary);
+          margin-top: 3px;
+          min-width: 22px;
+          font-size: 1.1rem;
+        }
+
+        .steps li strong {
+          color: var(--primary);
+        }
+
+        .card-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 25px;
+          margin-top: 30px;
+        }
+
+        .card {
+          background-color: var(--white);
+          border-radius: 10px;
+          padding: 25px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border-top: 4px solid var(--secondary);
+        }
+
+        .card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+          color: var(--primary);
+          margin-top: 0;
+          margin-bottom: 15px;
+          font-size: 1.3rem;
+        }
+
+        .card p {
+          margin-bottom: 0;
+          color: var(--gray);
+        }
+
+        .card-icon {
+          font-size: 2rem;
+          color: var(--secondary);
+          margin-bottom: 15px;
+        }
+
+        .footer {
+          background-color: var(--dark);
+          color: var(--light);
+          text-align: center;
+          padding: 30px 20px;
+          margin-top: 60px;
+        }
+
+        .footer p {
+          margin: 0;
+          opacity: 0.8;
+        }
+
+        .footer-links {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-top: 15px;
+        }
+
+        .footer-links a {
+          color: var(--light);
+          text-decoration: none;
+          transition: opacity 0.3s ease;
+        }
+
+        .footer-links a:hover {
+          opacity: 0.7;
+        }
+
+        .progress-container {
+          display: flex;
+          justify-content: center;
+          margin: 30px 0;
+        }
+
+        .progress-steps {
+          display: flex;
+          position: relative;
+          max-width: 800px;
+          width: 100%;
+        }
+
+        .progress-steps::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 0;
+          right: 0;
+          height: 3px;
+          background-color: var(--light-gray);
+          z-index: 1;
+        }
+
+        .progress-step {
+          position: relative;
+          z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 1;
+        }
+
+        .step-circle {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background-color: var(--light-gray);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--gray);
+          font-weight: 600;
+          margin-bottom: 10px;
+          transition: all 0.3s ease;
+        }
+
+        .step-circle.active {
+          background-color: var(--secondary);
+          color: white;
+          box-shadow: 0 4px 8px rgba(2, 136, 209, 0.3);
+        }
+
+        .step-label {
+          font-size: 0.9rem;
+          color: var(--gray);
+          text-align: center;
+          max-width: 120px;
+        }
+
+        .step-label.active {
+          color: var(--secondary);
+          font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+          .progress-steps {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+          }
+
+          .progress-steps::before {
+            display: none;
+          }
+
+          .progress-step {
+            flex-direction: row;
+            width: 100%;
+            gap: 15px;
+          }
+
+          .step-circle {
+            margin-bottom: 0;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-buttons-row">
+        <div class="left-buttons">
+            <a class="button primary-dark" href="/" th:href="@{/}">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+        <div class="right-buttons">
+            <a class="button secondary" href="/register" th:href="@{/register}">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+            <a class="button accent" href="/login" th:href="@{/login}">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+
+    <h1>Welcome, Organizer</h1>
+    <p>Manage discussions, guide participation, and review group decisions with our intuitive platform</p>
+</div>
+
+<div class="main-container">
+
+    <!-- Demo Section -->
+    <div class="demo-section">
+        <p>A quick walkthrough of how to set up and run your first discussion. <span class="highlight">Login to continue</span> and access all features.</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-container">
+        <div class="progress-steps">
+            <div class="progress-step">
+                <div class="step-circle active">1</div>
+                <div class="step-label active">Create Discussion</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-circle">2</div>
+                <div class="step-label">Manage Discussions</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-circle">3</div>
+                <div class="step-label">Run Discussion</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-circle">4</div>
+                <div class="step-label">Review Results</div>
+            </div>
+            <div class="progress-step">
+                <div class="step-circle">5</div>
+                <div class="step-label">Tips & Best Practices</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Discussion -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <h2>Step 1: Create a Discussion</h2>
+        </div>
+        <p>This is where everything begins. You define the topic, add questions, and prepare the options that participants will evaluate.</span></p>
+        <ul class="steps">
+            <li><i class="fas fa-pen"></i> <span>Choose a <strong>title</strong> and <strong>description</strong> that explain the purpose of your discussion.</span></li>
+            <li><i class="fas fa-question-circle"></i> <span>Add clear, focused <strong>questions</strong>—each should ask about one decision. Provide multiple <strong>options</strong> for each question.</span></li>
+            <li><i class="fas fa-list-ul"></i> <span>Choose the model, <strong>Ranking</strong> (no constraints on sum of preference) or <strong>Absolute</strong> (constrained to sum of preference <= 100) on how you want the participants to play the game. </span></li>
+            <li><i class="fas fa-clock"></i> <span>Set the <strong>schedule</strong> and how many options persist into the next round.</span></li>
+            <li><i class="fas fa-link"></i> <span>Once saved, share the <strong>Discussion Name</strong> and the generated <strong>Pass Key</strong> with your participants which will be available on the <strong>My Discussions</strong>.</span></li>
+        </ul>
+    </div>
+
+    <!-- Past Discussions -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h2>Step 2: Manage My Discussions</h2>
+        </div>
+        <p>Every discussion you create is saved in your dashboard. From here you can refine, remove, or review them.</p>
+        <ul class="steps">
+            <li><i class="fas fa-edit"></i> <strong>Update</strong> a discussion if you want to adjust questions or options before it begins.</li>
+            <li><i class="fas fa-trash-alt"></i> <strong>Delete</strong> discussions you no longer need.</li>
+            <li><i class="fas fa-chart-bar"></i> <strong>Report</strong> gives deeper insights into the result of the discussion.</li>
+            <li><i class="fas fa-clock"></i> <strong>Duration</strong> represents the maximum total time interval required for the discussion to complete. </li>
+        </ul>
+    </div>
+
+    <!-- How the Game Works -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-gamepad"></i>
+            </div>
+            <h2>Step 3: Run the Discussion Game</h2>
+        </div>
+        <p>When the session starts, participants join and the system takes care of the rest. Here's what happens:</p>
+        <ul class="steps">
+            <li><i class="fas fa-random"></i> Questions appear one at a time, with at most six options shown in each round.</li>
+            <li><i class="fas fa-sliders-h"></i> Participants use <strong>sliders</strong> to submit preferences.</li>
+            <li><i class="fas fa-project-diagram"></i> A live <strong>visualization</strong> shows the group's convergence in real-time.</li>
+            <li><i class="fas fa-bullseye"></i> At the end of each round, top option is revealed.</li>
+            <li><i class="fas fa-flag-checkered"></i> Once all rounds finish, the strongest option is stored as the final answer.</li>
+            <li><i class="fas fa-users"></i> The one-minute waiting room ensures all participants are ready simultaneously for a synchronized start.</li>
+            <li><i class="fas fa-clock"></i> To maintain discussion integrity, please join exactly at the scheduled time (no late entry) and remain active until the session concludes.</li>
+        </ul>
+    </div>
+
+    <!-- Results and Reports -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <h2>Step 4: Review Results and Reports</h2>
+        </div>
+        <p>After the session, understand outcomes with comprehensive analytics:</p>
+        <ul class="steps">
+            <li><i class="fas fa-chart-pie"></i> <strong>Reports</strong> – Analytics: option rankings, and a clear summary of engagement stats.</li>
+            <li><i class="fas fa-download"></i> <strong>Export Data</strong> – Download reports and share with others.</li>
+        </ul>
+    </div>
+
+    <!-- Tips -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <h2>Step 5: Tips for Better Discussions</h2>
+        </div>
+        <p>A few practices to ensure high-quality outcomes:</p>
+        <ul class="steps">
+            <li><i class="fas fa-bullhorn"></i> Keep each question focused on one decision.</li>
+            <li><i class="fas fa-balance-scale"></i> Provide options that are diverse but fair.</li>
+            <li><i class="fas fa-sync-alt"></i> Use persisting options smartly to keep strong candidates alive.</li>
+            <li><i class="fas fa-comments"></i> Encourage participants to use the chat constructively.</li>
+            <li><i class="fas fa-trophy"></i> Use reports to learn what worked and improve your future sessions.</li>
+        </ul>
+    </div>
+
+</div>
+
+<div class="footer">
+    <!--    <p>&copy; 2023 Swarm AI. All rights reserved.</p>-->
+    <!--    <div class="footer-links">-->
+    <!--        <a href="#">Privacy Policy</a>-->
+    <!--        <a href="#">Terms of Service</a>-->
+    <!--        <a href="#">Contact Us</a>-->
+    <!--        <a href="#">Support</a>-->
+    <!--    </div>-->
+</div>
+
+<script>
+    // Add some interactivity to the progress steps
+    document.addEventListener('DOMContentLoaded', function() {
+        const sections = document.querySelectorAll('.section');
+        const progressSteps = document.querySelectorAll('.progress-step');
+
+        // Function to update progress steps based on scroll position
+        function updateProgressSteps() {
+            const scrollPosition = window.scrollY + 200;
+
+            sections.forEach((section, index) => {
+                const sectionTop = section.offsetTop;
+
+                if (scrollPosition >= sectionTop) {
+                    progressSteps.forEach(step => step.classList.remove('active'));
+
+                    for (let i = 0; i <= index; i++) {
+                        if (progressSteps[i]) {
+                            progressSteps[i].classList.add('active');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial call
+        updateProgressSteps();
+
+        // Update on scroll
+        window.addEventListener('scroll', updateProgressSteps);
+
+        // Add click functionality to progress steps
+        progressSteps.forEach((step, index) => {
+            step.addEventListener('click', function() {
+                if (sections[index]) {
+                    sections[index].scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

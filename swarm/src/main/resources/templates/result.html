@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:font-weight="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${discussion.discussionName} + ' - Results'">Discussion Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .discussion-header {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .question-card {
+            border-left: 4px solid #0d6efd;
+            margin-bottom: 25px;
+            padding-left: 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        .correct-answer {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        .option-item {
+            padding: 8px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+        .stats-box {
+            background-color: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        /* PDF-specific styles */
+        @media print {
+            body {
+                padding: 0 !important;
+                margin: 0 !important;
+                background: white !important;
+                font-size: 12pt !important;
+            }
+
+            .container {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .question-card {
+                page-break-inside: avoid !important;
+                break-inside: avoid-page !important;
+                margin-bottom: 15pt !important;
+            }
+
+            .stats-box {
+                margin-bottom: 10pt !important;
+                padding: 10pt !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <!-- Discussion Header -->
+    <div class="discussion-header">
+        <h1 th:text="${discussion.discussionName}">Discussion Name</h1>
+        <p class="lead" th:text="${discussion.description}" th:if="${discussion.description != null}">Description goes here</p>
+
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>Scheduled Time</h6>
+                    <p id="scheduledTime" th:text="${discussion.scheduledTime}">Scheduled time</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>Duration</h6>
+                    <p th:text="${discussion.duration} + ' minutes'">Duration</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>Participants</h6>
+                    <p th:text="${discussion.numberOfParticipants}">Participants</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-box">
+                    <h6>Questions</h6>
+                    <p th:text="${discussion.numberOfQuestions}">Questions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Section -->
+    <h2 class="mb-4">Questions & Answers</h2>
+
+    <div th:each="question, iterStat : ${discussion.questions}" class="question-card">
+        <h4>
+            <span th:text="'Q' + ${iterStat.count} + ': '">Q1: </span>
+            <span th:text="${question.questionText}" style="font-weight: normal;">Question text</span>
+        </h4>
+
+        <!-- Options List -->
+        <div class="mb-3" th:if="${not #lists.isEmpty(question.options)}">
+            <h6>Options:</h6>
+            <div th:each="option : ${question.options}" class="option-item" th:text="${option}">Option</div>
+        </div>
+
+        <!-- Correct Answer -->
+        <div class="correct-answer">
+            <strong>Correct Answer:</strong>
+            <span th:text="${question.answer} ?: 'No answer provided'">None</span>
+        </div>
+    </div>
+
+    <div class="mt-5 no-print">
+        <a href="/past" class="btn btn-primary">Back</a>
+        <!--        <button id="downloadBtn" class="btn btn-success no-print"> Download PDF </button>-->
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- For PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- For icons (optional) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<script>
+    function formatDateTime(isoDateString) {
+        if (!isoDateString) return 'N/A';
+
+        const date = new Date(isoDateString);
+        if (isNaN(date.getTime())) return isoDateString; // Return original if invalid
+
+        // Format: dd-mm-yyyy hh:mm
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${day}-${month}-${year} ${hours}:${minutes}`;
+    }
+
+    // Format the time when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeElement = document.getElementById('scheduledTime');
+        if (timeElement) {
+            timeElement.textContent = formatDateTime(timeElement.textContent);
+        }
+    });
+
+
+    // Improved Download functionality
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+        // Clone container content
+        const element = document.querySelector('.container').cloneNode(true);
+
+        // Remove unwanted elements
+        element.querySelectorAll('.no-print').forEach(el => el.remove());
+
+        // ✅ Ensure proper wrapping in PDF
+        element.querySelectorAll('*').forEach(el => {
+            el.style.wordWrap = "break-word";
+            el.style.overflowWrap = "break-word";
+            el.style.whiteSpace = "normal";
+            el.style.maxWidth = "100%";
+        });
+
+        // PDF options
+        const opt = {
+            margin: [10, 10, 15, 10], // extra bottom for footer
+            filename: `${document.querySelector('h1').textContent.trim().replace(/\s+/g, "_")}_Results.pdf`,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: {
+                scale: 3, // higher scale = sharper PDF
+                useCORS: true,
+                scrollY: 0,
+                windowWidth: document.body.scrollWidth // keep layout consistent
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait'
+            },
+            pagebreak: {
+                mode: ['css', 'legacy'], // allow CSS-based page breaks
+                before: '.question-card', // break cleanly before each question block
+                avoid: ['.no-break', 'img', 'table'] // avoid breaking inside key blocks
+            }
+        };
+
+        // Generate PDF with page numbers
+        html2pdf()
+            .set(opt)
+            .from(element)
+            .toPdf()
+            .get('pdf')
+            .then(function (pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(120);
+                    pdf.text(
+                        `Page ${i} of ${totalPages}`,
+                        pdf.internal.pageSize.getWidth() - 25,
+                        pdf.internal.pageSize.getHeight() - 8
+                    );
+                }
+            })
+            .save();
+    });
+</script>
+
+</body>
+</html>

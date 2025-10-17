@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collective Decision Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2e7d32; /* Forest green */
+      --primary-dark: #1b5e20;
+      --secondary: #0288d1; /* Sky blue */
+      --accent: #ad1457; /* Subtle floral pink */
+      --dark: #263238; /* Dark slate */
+      --light: #f5f5f6; /* Off-white */
+      --gray: #607d8b; /* Blue-gray */
+      --success: #00bcd4; /* Teal */
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      text-align: center;
+      padding: 40px 0 30px;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .logo {
+      position: absolute;
+      left: 250px;
+      top: 45%;
+      transform: translateY(-50%);
+      height: 80px;
+      width: auto;
+    }
+
+    .header-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .header h1 {
+      font-weight: 600;
+      font-size: 2.5rem;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-weight: 300;
+      font-size: 1.1rem;
+      margin: 10px 0 0;
+      opacity: 0.9;
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid rgba(46, 125, 50, 0.1);
+      padding-bottom: 20px;
+    }
+
+    .about-section {
+      flex: 1;
+      text-align: left;
+    }
+
+    .about-section h2 {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+    }
+
+    .button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3);
+    }
+
+    .button.secondary {
+      background-color: var(--secondary);
+      box-shadow: 0 4px 6px rgba(2, 136, 209, 0.2);
+    }
+
+    .button.secondary:hover {
+      background-color: #0277bd;
+      box-shadow: 0 6px 12px rgba(2, 136, 209, 0.3);
+    }
+
+    .button i {
+      font-size: 1.2rem;
+    }
+
+    .hero-section {
+      text-align: center;
+      margin: 60px 0;
+      padding: 0 20px;
+    }
+
+    .hero-section p {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 800px;
+      margin: 0 auto 30px;
+      line-height: 1.8;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 4px solid var(--primary);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .feature-card h3 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      color: var(--secondary);
+      margin-bottom: 20px;
+    }
+
+    .feature-card:nth-child(2) {
+      border-top-color: var(--secondary);
+    }
+
+    .feature-card:nth-child(2) h3 {
+      color: var(--secondary);
+    }
+
+    .feature-card:nth-child(3) {
+      border-top-color: var(--accent);
+    }
+
+    .feature-card:nth-child(3) h3 {
+      color: var(--accent);
+    }
+
+    .feedback-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .feedback-btn {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .feedback-btn:hover {
+      background-color: #880e4f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .feedback-form {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+      width: 350px;
+      margin-top: 15px;
+      display: none;
+      position: absolute;
+      bottom: 60px;
+      right: 0;
+    }
+
+    .feedback-form h3 {
+      margin-top: 0;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .submit-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .form-message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #a5d6a7;
+    }
+
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 1px solid #ef9a9a;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 30px 0 25px;
+      }
+
+      .logo {
+        position: static;
+        transform: none;
+        margin-bottom: 15px;
+        height: 50px;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .nav-row {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .about-section {
+        text-align: center;
+      }
+
+      .buttons {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .feedback-form {
+        width: 300px;
+        right: -50px;
+      }
+    }
+
+    .video-placeholder {
+      width: 100%;
+      max-width: 720px;
+      height: 405px;
+      margin: 0 auto 40px;
+      background-color: #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #888;
+      font-size: 1.2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .footer {
+      background-color: var(--dark);
+      color: var(--light);
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 60px;
+    }
+
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="header">
+  <div class="header-content">
+    <img th:src="@{/images/logo.png}" src="../static/images/logo.png" alt="Swarm AI Logo" class="logo">
+    <h1>Collective Intelligence</h1>
+    <p>Bringing human collaboration and algorithms together to reach smarter consensus</p>
+  </div>
+</div>
+
+<div class="main-container">
+  <div class="nav-row">
+    <div class="about-section">
+      <h2>About the Platform</h2>
+    </div>
+    <div class="buttons">
+      <a class="button" href="/organizer">
+        <i class="fas fa-users-cog"></i> Organizer Portal
+      </a>
+      <a class="button secondary" href="/user">
+        <i class="fas fa-user-friends"></i> Participant Portal
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-section">
+    <p>
+      This is an interactive platform designed to capture collective intelligence from groups.
+      Instead of relying on traditional voting or averaging opinions, it models how individuals continuously adjust their preferences
+      to align with others — resulting in a truly collaborative consensus.
+    </p>
+    <p>
+      Our system uses the <strong>Bradley-Terry model</strong> to interpret group preferences through paired comparisons,
+      dynamically refining the strength of each option as participants interact.
+      The result is an evolving understanding of which ideas the group values most — driven not by noise, but by collective reasoning.
+    </p>
+  </div>
+
+  <!-- Demo Section -->
+  <div class="hero-section">
+    <h2>How & Why It Works</h2>
+    <p>
+      Participants engage with one question at a time, each offering multiple options.
+      As they rate or adjust their sliders, the system continuously evaluates preferences using the <strong>Bradley–Terry framework</strong>,
+      estimating the likelihood that each option best represents the collective choice.
+    </p>
+    <p>
+      The Bradley–Terry model is a statistical framework that quantifies preferences by comparing pairs of options.
+      It assigns a strength parameter to each option, representing its relative appeal to the group.
+      As participants interact, the model adjusts these strength parameters based on the choices made, leading to a stable consensus.
+    </p>
+    <p>
+      This collective evolution mirrors <strong>swarm intelligence</strong> in nature:
+      many independent participants interact, adapt, and influence one another’s perspectives, leading to an organized and intelligent group outcome — all without any central control.
+    </p>
+    <!--    <div class="video-placeholder">Demo Video Coming Soon...</div>-->
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="fas fa-brain"></i>
+      </div>
+      <h3>Modeling Collective Intelligence</h3>
+      <p>We use the Bradley-Terry model to translate participant inputs into interpretable collective preferences, providing data-driven consensus outcomes.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="fas fa-balance-scale"></i>
+      </div>
+      <h3>Fairness through Interaction</h3>
+      <p>Each participant’s voice influences the final outcome proportionally.
+        The process rewards convergence built on shared reasoning rather than domination or bias.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <h3>Transparent Results</h3>
+      <p>Visualized reports and ranking table show group preferences and which options ultimately reflect the consensus —
+        empowering organizers with meaningful insights.</p>
+    </div>
+  </div>
+</div>
+
+<div class="feedback-container">
+  <button class="feedback-btn" id="feedbackToggle">
+    <i class="fas fa-comment-alt"></i> Feedback
+  </button>
+
+  <div class="feedback-form" id="feedbackForm">
+    <h3>Share Your Feedback</h3>
+    <form id="feedbackFormData">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="Your email address">
+      </div>
+
+      <div class="form-group">
+        <label for="message">Your Feedback</label>
+        <textarea id="message" name="message" required placeholder="Please share your thoughts..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn">Send Feedback</button>
+    </form>
+
+    <div class="form-message" id="formMessage"></div>
+  </div>
+</div>
+
+<div class="footer">
+</div>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const feedbackToggle = document.getElementById('feedbackToggle');
+    const feedbackForm = document.getElementById('feedbackForm');
+    const feedbackFormData = document.getElementById('feedbackFormData');
+    const formMessage = document.getElementById('formMessage');
+
+    // Toggle form visibility
+    feedbackToggle.addEventListener('click', function() {
+      if (feedbackForm.style.display === 'block') {
+        feedbackForm.style.display = 'none';
+      } else {
+        feedbackForm.style.display = 'block';
+      }
+    });
+
+    // Handle form submission
+    feedbackFormData.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const message = document.getElementById('message').value;
+
+      // Simple validation
+      if (!email || !message) {
+        showMessage('Please fill in all fields', 'error');
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        showMessage('Please enter a valid email address', 'error');
+        return;
+      }
+
+      // Show loading state
+      const submitBtn = feedbackFormData.querySelector('.submit-btn');
+      submitBtn.textContent = 'Sending...';
+      submitBtn.disabled = true;
+
+      // Send data to server
+      fetch('/send-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, message })
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok.');
+      })
+      .then(data => {
+        showMessage('Thank you for your feedback! We\'ll get back to you soon.', 'success');
+        feedbackFormData.reset();
+      })
+      .catch(error => {
+        showMessage('Sorry, there was an error sending your feedback. Please try again later.', 'error');
+        console.error('Error:', error);
+      })
+      .finally(() => {
+        submitBtn.textContent = 'Send Feedback';
+        submitBtn.disabled = false;
+      });
+    });
+
+    function showMessage(text, type) {
+      formMessage.textContent = text;
+      formMessage.className = 'form-message ' + type;
+      formMessage.style.display = 'block';
+
+      // Hide message after 5 seconds
+      setTimeout(() => {
+        formMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    // Close form when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!feedbackForm.contains(e.target) && e.target !== feedbackToggle) {
+        feedbackForm.style.display = 'none';
+      }
+    });
+  });
+
+</script>
+</body>
+</html>
