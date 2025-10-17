@@ -8,9 +8,9 @@
 /swarm/dependency-reduced-pom.xml
 /swarm/buildNumber.properties
 /swarm/.mvn/
-!.mvn/wrapper/
-!.mvn/wrapper/maven-wrapper.jar
-!.mvn/wrapper/maven-wrapper.properties
+!/swarm/.mvn/wrapper/
+!/swarm/.mvn/wrapper/maven-wrapper.jar
+!/swarm/.mvn/wrapper/maven-wrapper.properties
 
 # Python - microservice directory
 /microservice/__pycache__/
