@@ -7,10 +7,6 @@
 /swarm/release.properties
 /swarm/dependency-reduced-pom.xml
 /swarm/buildNumber.properties
-/swarm/.mvn/
-!/swarm/.mvn/wrapper/
-!/swarm/.mvn/wrapper/maven-wrapper.jar
-!/swarm/.mvn/wrapper/maven-wrapper.properties
 
 # Python - microservice directory
 /microservice/__pycache__/
@@ -59,8 +55,3 @@ Thumbs.db
 # Local development databases
 *.db
 *.sqlite3
-
-# Application specific
-/swarm/*.jar
-/microservice/instance/
-/microservice/*.db
