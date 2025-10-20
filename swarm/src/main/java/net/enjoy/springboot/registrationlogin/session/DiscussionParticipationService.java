@@ -83,8 +83,9 @@ public class DiscussionParticipationService {
 
             if (startTime != null && durationMinutes != null && durationMinutes > 0) {
                 OffsetDateTime endTime = startTime.plusMinutes(durationMinutes);
+                OffsetDateTime graceEndTime = endTime.plusMinutes(1);
 
-                if (now.isAfter(endTime)) {
+                if (now.isAfter(graceEndTime)) {
                     // 🧹 Clear chat user-number map
                     chatController.clearDiscussionUserMap(discussionId);
 

@@ -60,6 +60,8 @@ public class PuckScheduler {
             int roundNum = sliderEntries.get(0).getRoundNum();
             String mode = sessionService.getMode(discussionId);
             DiscussionFileLogger.log(discussionId, String.format("Processing strengths for questionId=%d roundNum=%d with %d entries, mode %s", questionId, roundNum, sliderEntries.size(), mode));
+            DiscussionFileLogger.logReadingsAndScores(discussionId, String.format("Processing strengths for questionId=%d roundNum=%d with %d entries, mode %s", questionId, roundNum, sliderEntries.size(), mode));
+            DiscussionFileLogger.logReadingsAndScores(discussionId, submissions.toString());
 
             try {
                 // Call PythonService
@@ -78,6 +80,7 @@ public class PuckScheduler {
 
                     sessionService.updateOptionFitnessScores(questionId, roundNum, optionLabels, response.getFitnessScores());
                     DiscussionFileLogger.log(discussionId, String.format("Updated option fitness scores for questionId=%d roundNum=%d", questionId, roundNum));
+                    DiscussionFileLogger.logReadingsAndScores(discussionId, response.getFitnessScores().toString());
 
                     Map<String, Object> data = new HashMap<>();
                     data.put("strengths", response.getFitnessScores());
@@ -95,6 +98,7 @@ public class PuckScheduler {
                         int matchedIndex = response.getConvergedIndex();
                         String answer = optionLabels.get(matchedIndex);
                         DiscussionFileLogger.log(discussionId, String.format("Converged to Option %d (%s) for question %d", matchedIndex + 1, answer, questionId));
+                        DiscussionFileLogger.logReadingsAndScores(discussionId, String.format("Converged to Option %d (%s) for question %d", matchedIndex + 1, answer, questionId));
 
                         // First Update answer in DB
                         sessionService.updateAnswerByQuestionId(discussionId, questionId, answer);

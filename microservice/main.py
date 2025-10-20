@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
-from processing import ConsensusScoreMicroservice
+from processing import HumanSwarmConsensusMicroservice
 
 # Initialize app and service
 app = FastAPI()
-microservice = ConsensusScoreMicroservice()
+microservice = HumanSwarmConsensusMicroservice()
 
 # --------------------
 # Request Models

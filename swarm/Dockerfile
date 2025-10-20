@@ -22,7 +22,7 @@ WORKDIR /app
 RUN apk add --no-cache curl && \
     # Create non-root user and directories in single layer
     addgroup -S appuser && adduser -S appuser -G appuser && \
-    mkdir -p /app/chat_logs /app/discussion_logs /app/discussion_websocket_logs && \
+    mkdir -p /app/chat_logs /app/discussion_logs /app/discussion_websocket_logs /app/discussion_readings_logs && \
     chown -R appuser:appuser /app
 
 # Copy the JAR from build stage

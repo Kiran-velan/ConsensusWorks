@@ -28,7 +28,7 @@ public class RoundTimerService {
         this.pythonService = pythonService;
     }
 
-    int roundDurationSeconds = 300;    // for now it is 30 seconds round, n min = n * 60 seconds
+    int roundDurationSeconds = 180;    // for now it is 30 seconds round, n min = n * 60 seconds
 
     /**
      * Called when a new discussion starts
@@ -60,6 +60,7 @@ public class RoundTimerService {
 
         // Compute next round end time
         Instant nextEndTime = Instant.now().plusSeconds(roundDurationSeconds);
+        DiscussionFileLogger.logReadingsAndScores(discussionId, "Round ends for discussion.");
 
         // Update map
         roundEndTimes.put(discussionId, nextEndTime);

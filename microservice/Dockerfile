@@ -6,7 +6,8 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+    apt-get clean && \
+    mkdir /app/Logs
 
 # Copy requirements and install
 COPY requirements.txt .

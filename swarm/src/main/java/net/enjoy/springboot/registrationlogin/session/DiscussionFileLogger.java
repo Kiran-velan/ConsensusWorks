@@ -16,11 +16,13 @@ public class DiscussionFileLogger {
 
     private static final String LOG_DIR = "discussion_logs";
     private static final String WS_LOG_DIR = "discussion_websocket_logs";
+    private static final String READINGS_LOG_DIR = "discussion_readings_logs";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     static {
         createDirectory(LOG_DIR);
         createDirectory(WS_LOG_DIR);
+        createDirectory(READINGS_LOG_DIR);
     }
 
     /** Utility to ensure directory exists */
@@ -43,6 +45,11 @@ public class DiscussionFileLogger {
     /** ✅ New WebSocket-specific log */
     public static void logWebSocket(Long discussionId, String message) {
 //        writeToFile(WS_LOG_DIR + "/ws-" + discussionId + ".log", message);
+    }
+
+    // Readings and scores
+    public static void logReadingsAndScores(Long discussionId, String message) {
+        writeToFile(READINGS_LOG_DIR + "/discussion-" + discussionId + ".log", message);
     }
 
     /** Common writer utility */

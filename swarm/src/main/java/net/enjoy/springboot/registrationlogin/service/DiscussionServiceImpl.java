@@ -63,7 +63,7 @@ public class DiscussionServiceImpl implements DiscussionService {
     @Autowired
     private QuestionOptionService questionOptionService;
 
-    final int ROUND_DURATION_MINUTES = 5;
+    final int ROUND_DURATION_MINUTES = 3;
 
     @Transactional(rollbackFor = Exception.class)
     @Override

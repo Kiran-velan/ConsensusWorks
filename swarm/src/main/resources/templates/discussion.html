@@ -916,7 +916,7 @@
   let discussionType = null;
   let scheduledTime = null; // It is in UTC format "2025-08-31T13:30:00Z", so use it correctly here
   let converged = false; // default false, used for timer and puck
-  const ROUND_DURATION = 300; // later change to 300 for 5 min
+  const ROUND_DURATION = 180; // later change to 300 for 5 min
   let roundNumber = 1;
   let popupActive = false; // To Prevent puck updates during popup
 
@@ -1294,6 +1294,13 @@
           <p>Answer of this round: ${answerText}</p>
           <br>
           <p>Thank you for participating.</p>
+          <br>
+          <p>Please help us improve by sharing your feedback:</p>
+          <a href="https://forms.gle/gddXvir1AP2e2AoE9"
+             target="_blank"
+             style="display: inline-block; background: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px; font-weight: bold;">
+              Share Your Feedback
+          </a>
       `;
 
       // Prevent closing the popup

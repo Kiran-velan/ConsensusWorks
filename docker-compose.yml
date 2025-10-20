@@ -51,6 +51,7 @@ services:
       - spring_chat_logs:/app/chat_logs
       - spring_discussion_logs:/app/discussion_logs
       - spring_discussion_websocket_logs:/app/discussion_websocket_logs
+      - spring_discussion_readings_logs:/app/discussion_readings_logs
     networks:
       - swarm-network
 
@@ -62,6 +63,8 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+    volumes:
+      - fastapi_logs:/app/Logs
     networks:
       - swarm-network
     healthcheck:
@@ -89,6 +92,8 @@ volumes:
   spring_chat_logs:
   spring_discussion_logs:
   spring_discussion_websocket_logs:
+  spring_discussion_readings_logs:
+  fastapi_logs:
 
 networks:
   swarm-network:

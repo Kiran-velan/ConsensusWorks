@@ -14,6 +14,7 @@
 /microservice/build/
 /microservice/dist/
 /microservice/*.egg-info/
+/microservice/Logs/
 
 # Logs (in both root and swarm directory)
 /logs/
@@ -21,6 +22,7 @@
 swarm/chat_logs/
 swarm/discussion_logs/
 swarm/discussion_websocket_logs/
+swarm/discussion_readings_logs/
 
 # IDE and Editor files (applies to all directories)
 .idea/
