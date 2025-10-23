@@ -1260,61 +1260,65 @@
   }
 
   async function showFinalPopup() {
-      const overlay = document.createElement("div");
-      overlay.classList.add("overlay");
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-      overlay.style.zIndex = '1000';
-      overlay.style.display = 'flex';
-      overlay.style.justifyContent = 'center';
-      overlay.style.alignItems = 'center';
+    const overlay = document.createElement("div");
+    overlay.classList.add("overlay");
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    overlay.style.zIndex = '1000';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
 
-      const popup = document.createElement("div");
-      popup.classList.add("popup-container");
-      popup.style.backgroundColor = 'white';
-      popup.style.padding = '20px';
-      popup.style.borderRadius = '10px';
-      popup.style.textAlign = 'center';
-      popup.style.maxWidth = '400px';
-      popup.style.width = '90%';
+    const popup = document.createElement("div");
+    popup.classList.add("popup-container");
+    popup.style.backgroundColor = 'white';
+    popup.style.padding = '20px';
+    popup.style.borderRadius = '10px';
+    popup.style.textAlign = 'center';
+    popup.style.maxWidth = '400px';
+    popup.style.width = '90%';
 
-      popupActive = true; // 🚫 Lock puck updates and don't have to unlock after this
+    popupActive = true; // 🚫 Lock puck updates and don't have to unlock after this
 
-      // Get answer text asynchronously
-      const lastQuestion = discussionData.questions[discussionData.questions.length - 1];
-      const answerText = await getAnswerTextForRound(lastQuestion);
+    // Get answer text asynchronously
+    const lastQuestion = discussionData.questions[discussionData.questions.length - 1];
+    const answerText = await getAnswerTextForRound(lastQuestion);
 
-      popup.innerHTML = `
-          <h2>Discussion Completed</h2>
-          <br>
-          <p>Answer of this round: ${answerText}</p>
-          <br>
-          <p>Thank you for participating.</p>
-          <br>
-          <p>Please help us improve by sharing your feedback:</p>
-          <a href="https://forms.gle/gddXvir1AP2e2AoE9"
-             target="_blank"
-             style="display: inline-block; background: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px; font-weight: bold;">
-              Share Your Feedback
-          </a>
-      `;
+    popup.innerHTML = `
+        <h2>Discussion Completed</h2>
+        <br>
+        <p>Answer of this round: ${answerText}</p>
+        <br>
+        <p>Thank you for participating.</p>
+        <br>
+        <p>Please help us improve by sharing your feedback:</p>
+        <a href="https://forms.gle/gddXvir1AP2e2AoE9"
+           target="_blank"
+           style="display: inline-block; background: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin-top: 10px; font-weight: bold;">
+            Share Your Feedback
+        </a>
+    `;
 
-      // Prevent closing the popup
-      popup.style.pointerEvents = 'all';
-      overlay.style.pointerEvents = 'all';
+    // Prevent closing the popup when clicking the overlay background
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
 
-      // Disable all interactions beneath the popup
-      overlay.addEventListener('click', (e) => e.preventDefault());
-      popup.addEventListener('click', (e) => e.preventDefault());
+    // Allow all interactions within the popup (including the link) to work normally
+    popup.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent click from bubbling up to overlay
+    });
 
-      overlay.appendChild(popup);
-      document.body.appendChild(overlay);
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
   }
-
 
   function showDescriptionPopup() {
     document.getElementById("descriptionPopup").style.display = "block";
@@ -1584,7 +1588,7 @@
       if (stops[2]) stops[2].setAttribute('offset', `${(t2*100).toFixed(1)}%`);
     });
     if (consensus) {
-      if (maxNorm >= 0.75) consensus.classList.add('hot'); else consensus.classList.remove('hot');
+      if (maxNorm >= 0.72) consensus.classList.add('hot'); else consensus.classList.remove('hot');
     }
   }
 

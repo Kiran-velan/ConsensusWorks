@@ -21,10 +21,7 @@ def get_discussion_logger(discussion_id: int) -> logging.Logger:
         handler = logging.FileHandler(log_file, encoding='utf-8')
         handler.setLevel(logging.DEBUG)
 
-        formatter = logging.Formatter(
-            "%(asctime)s [%(levelname)s] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S"
-        )
+        formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
 
         logger.addHandler(handler)
