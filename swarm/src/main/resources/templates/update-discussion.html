@@ -191,7 +191,7 @@
             transition: background-color 0.3s ease; /* Smooth hover effect */
         }
 
-        .btn-increase:hover:not(:disabled), .btn-decrease:hover:not(:disabled) {
+        .btn-increase:hover:not(:disabled) {
             background-color: #1a4a8a; /* Darker blue on hover */
         }
 
@@ -205,7 +205,7 @@
             background-color: #dc3545; /* Red color for decrease button */
         }
 
-        .btn-decrease:hover {
+        .btn-decrease:hover, .btn-decrease:hover:not(:disabled) {
             background-color: #c82333; /* Darker red on hover */
         }
 
