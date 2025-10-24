@@ -35,6 +35,7 @@ services:
       redis:
         condition: service_healthy
     environment:
+      MICROSERVICE_URL: ${MICROSERVICE_URL}
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}

@@ -1,6 +1,7 @@
 package net.enjoy.springboot.registrationlogin.service;
 
 import net.enjoy.springboot.registrationlogin.dto.PuckCoordinatesDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,7 +19,13 @@ import net.enjoy.springboot.registrationlogin.session.DiscussionFileLogger;
 public class PythonService {
 
     private static final Logger log = LoggerFactory.getLogger(PythonService.class);
-    private final WebClient webClient = WebClient.create("http://fastapi:5000");
+    private final WebClient webClient;
+
+    // Constructor with environment variable
+    public PythonService(@Value("${microservice.url}") String microserviceUrl) {
+        this.webClient = WebClient.create(microserviceUrl);
+        log.info("PythonService initialized with URL: {}", microserviceUrl);
+    }
 
     public PuckCoordinatesDto calculatePuckPosition(Long discussionId, List<List<Double>> submissions, String mode) {
         Map<String, Object> requestBody = new HashMap<>();
