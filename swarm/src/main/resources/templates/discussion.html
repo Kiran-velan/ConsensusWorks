@@ -922,7 +922,7 @@
 
   async function loadDiscussionDetails(discussionId) {
       try {
-          const response = await fetch(`http://localhost:8080/session/discussion-details?discussionId=${discussionId}`);
+          const response = await fetch(`/session/discussion-details?discussionId=${discussionId}`);
           const result = await response.json();
 
           if (response.ok) {
@@ -953,7 +953,7 @@
   async function getAnswerTextForRound(question) {
       const questionId = question.id;
       try {
-          const response = await fetch(`http://localhost:8080/session/answer?questionId=${questionId}`);
+          const response = await fetch(`/session/answer?questionId=${questionId}`);
           if (!response.ok) {
               throw new Error('Network response was not ok');
           }
@@ -975,7 +975,7 @@
       if (allOptions.length > 6) {
           try {
               // Fetch persisted options (could be 2 or 3)
-              const response = await fetch(`http://localhost:8080/session/top-options?questionId=${currentQuestion.id}&roundNumber=${roundNumber}`);
+              const response = await fetch(`/session/top-options?questionId=${currentQuestion.id}&roundNumber=${roundNumber}`);
               if (!response.ok) throw new Error('Network error');
               const persistedOptions = await response.json();
               const persistCount = persistedOptions.length;
