@@ -208,17 +208,17 @@
 
     // Function to redirect to update page for a discussion
     async function updateDiscussion(discussionId) {
-        window.location.href = `http://localhost:8080/update?discussionId=${discussionId}`;
+        window.location.href = `/update?discussionId=${discussionId}`;
     }
 
     // Function to redirect to result page for a discussion
     async function generateResult(discussionId) {
-        window.location.href = `http://localhost:8080/result?discussionId=${discussionId}`;
+        window.location.href = `/result?discussionId=${discussionId}`;
     }
 
     // Function to generate a report for a discussion
     async function generateReport(discussionId) {
-        window.location.href = `http://localhost:8080/report?discussionId=${discussionId}`;
+        window.location.href = `/report?discussionId=${discussionId}`;
     }
 
     // Function to delete a discussion
