@@ -777,9 +777,9 @@
 
       <div class="chat-container">
         <ul id="messageArea"></ul>
-        <form id="messageForm">
+        <form id="messageForm" onsubmit="return false;">
           <input type="text" id="message" placeholder="Type your message..." autocomplete="off" />
-          <button type="submit">Send</button>
+          <button type="button" id="sendBtn">Send</button>
         </form>
       </div>
 
@@ -1346,10 +1346,10 @@
     }
 
     const loc = window.location;
-    const protocol = loc.protocol === "https:" ? "wss://" : "ws://";
-    const socketUrl = protocol + loc.host + "/ws";
+    const protocol = loc.protocol === "https:" ? "https://" : "http://";
+    const socketUrl = protocol + loc.host + "/ws"; // ✅ SockJS requires http/https
 
-    console.log(window.location.protocol, window.location.host);
+    console.log("Connecting to SockJS at:", socketUrl);
 
     const socket = new SockJS(socketUrl);
     stompClient = Stomp.over(socket);
@@ -1418,11 +1418,10 @@
     connectToWebSocket();
     buildSectors();
 
-    const messageForm = document.getElementById('messageForm');
     const messageInput = document.getElementById('message');
+    const sendBtn = document.getElementById('sendBtn');
 
-    messageForm.addEventListener('submit', function(e) {
-      e.preventDefault();
+    sendBtn.addEventListener('click', function() {
       const message = messageInput.value.trim();
       if (!message || !stompClient || !stompClient.connected) return;
       sendChatMessage(message);
