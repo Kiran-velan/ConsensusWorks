@@ -1,12 +1,8 @@
 package net.enjoy.springboot.registrationlogin.security;
 
-import jakarta.mail.internet.MimeMessage;
 import net.enjoy.springboot.registrationlogin.entity.OtpToken;
 import net.enjoy.springboot.registrationlogin.repository.OtpTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -19,7 +15,7 @@ public class OtpService {
     private OtpTokenRepository otpTokenRepo;
 
     @Autowired
-    private JavaMailSender mailSender;
+    private BrevoMailService brevoMailService;
 
     public String generateOtp(String email) {
         String otp = String.valueOf(new SecureRandom().nextInt(900000) + 100000); // 6-digit OTP
@@ -35,47 +31,21 @@ public class OtpService {
     }
 
     public void sendOtpEmail(String toEmail, String otp) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
+        String subject = "ConsensusWorks - One Time Password (OTP)";
 
-            // true = multipart message
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        String textContent = "Hello,\n\nYour OTP is: " + otp +
+                "\n\nThis code will expire in 10 minutes.\n\nThanks,\nConsensusWorks Team";
 
-            // the actual SMTP authentication credentials (username/password) that JavaMail uses to send the email come from application.properties
-            helper.setFrom("yourgmail@gmail.com", "ConsensusWorks Support"); // only sets the From: header in the email.
-            helper.setTo(toEmail);
-            helper.setSubject("ConsensusWorks - One Time Password (OTP)");
+        String htmlContent = "<div style='font-family: Arial, sans-serif; line-height: 1.6;'>" +
+                "<h2>ConsensusWorks OTP Verification</h2>" +
+                "<p>Hello,</p>" +
+                "<p>Your one-time password (OTP) is:</p>" +
+                "<h3 style='color: #2E7D32;'>" + otp + "</h3>" +
+                "<p>This code will expire in <b>10 minutes</b>.</p>" +
+                "<br><p>Thanks,<br>ConsensusWorks Team</p>" +
+                "</div>";
 
-            // ✅ Plain text version (fallback)
-            String textContent = "Hello,\n\n" +
-                    "Your one-time password (OTP) for ConsensusWorks is: " + otp + "\n\n" +
-                    "This code will expire in 10 minutes.\n\n" +
-                    "If you didn’t request this, please ignore this email.\n\n" +
-                    "Thanks,\nThe ConsensusWorks Team";
-
-            // ✅ HTML version (inbox friendly)
-            String htmlContent = "<div style='font-family: Arial, sans-serif; line-height: 1.6;'>" +
-                    "<h2>Swarm AI OTP Verification</h2>" +
-                    "<p>Hello,</p>" +
-                    "<p>Your one-time password (OTP) is:</p>" +
-                    "<h3 style='color: #2E7D32;'>" + otp + "</h3>" +
-                    "<p>This code will expire in <b>10 minutes</b>.</p>" +
-                    "<p>If you did not request this, please ignore this email.</p>" +
-                    "<br><p>Thanks,<br>Swarm AI Team</p>" +
-                    "</div>";
-
-            // Add both plain text and HTML
-            helper.setText(textContent, htmlContent);
-
-            mailSender.send(message);
-
-            System.out.println("✅ OTP email sent to: " + toEmail);
-
-        } catch (MessagingException e) {
-            System.err.println("❌ Failed to send OTP email: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("❌ Unexpected error: " + e.getMessage());
-        }
+        brevoMailService.sendEmail(toEmail, subject, htmlContent, textContent);
     }
 
     public boolean verifyOtp(String email, String otp) {

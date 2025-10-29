@@ -1340,7 +1340,18 @@
   let lastSentMessage = null; // Store last sent message
 
   function connectToWebSocket() {
-    const socket = new SockJS("/ws");
+    if (stompClient && stompClient.connected) {
+      console.log("ℹ️ WebSocket already connected.");
+      return;
+    }
+
+    const loc = window.location;
+    const protocol = loc.protocol === "https:" ? "wss://" : "ws://";
+    const socketUrl = protocol + loc.host + "/ws";
+
+    console.log(window.location.protocol, window.location.host);
+
+    const socket = new SockJS(socketUrl);
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
@@ -1603,6 +1614,17 @@
     // Trigger browser’s default confirmation dialog
     e.preventDefault();
     e.returnValue = confirmationMessage;
+
+    // ✅ Gracefully close WebSocket if connected
+    try {
+      if (stompClient && stompClient.connected) {
+        stompClient.disconnect(() => {
+          console.log("🧩 WebSocket disconnected cleanly before unload.");
+        });
+      }
+    } catch (err) {
+      console.warn("⚠️ Error during WebSocket disconnect:", err);
+    }
 
     // If user really proceeds (page unloads), beacon will fire
     const params = new URLSearchParams();
