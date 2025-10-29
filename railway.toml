@@ -1,8 +1,5 @@
 [build]
-builder = "DOCKERFILE"
-
-[build.dockerfile]
-path = "docker-compose.yml"
+builder = "NIXPACKS"
 
 [deploy]
 numReplicas = 1
