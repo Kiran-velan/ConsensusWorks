@@ -1,0 +1,8 @@
+[build]
+builder = "DOCKERFILE"
+
+[build.dockerfile]
+path = "docker-compose.yml"
+
+[deploy]
+numReplicas = 1
