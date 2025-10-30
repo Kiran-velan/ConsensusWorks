@@ -2,7 +2,7 @@
 import logging
 import os
 
-LOG_DIR = os.path.join(os.path.dirname(__file__), "/app/logs/Logs")
+LOG_DIR = "/app/logs/Logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
 def get_discussion_logger(discussion_id: int) -> logging.Logger:

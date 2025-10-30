@@ -6,7 +6,9 @@ WORKDIR /app
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/* && \
-    apt-get clean
+    apt-get clean && \
+    # Create log directory with correct permissions
+    mkdir -p /app/logs/Logs
 
 # Copy requirements and install
 COPY requirements.txt .
@@ -16,8 +18,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Create non-root user (security best practice)
-RUN mkdir -p /app/logs/Logs && \
-    useradd -m -r appuser && chown -R appuser:appuser /app
+RUN useradd -m -r appuser && \
+    chown -R appuser:appuser /app/logs && \
+    chown -R appuser:appuser /app
+
 USER appuser
 
 # Health check

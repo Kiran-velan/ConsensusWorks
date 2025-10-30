@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Controller
 public class ChatController {
 
-    private static final String CHAT_LOG_DIR = "chat_logs/";
+    private static final String CHAT_LOG_DIR = "/app/logs/chat_logs/";
     private final Map<Long, Map<String, Integer>> discussionUserMap = new ConcurrentHashMap<>();
 
     // Message handler
