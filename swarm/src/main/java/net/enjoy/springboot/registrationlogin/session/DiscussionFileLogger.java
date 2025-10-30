@@ -14,14 +14,15 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class DiscussionFileLogger {
 
-    private static final String LOG_DIR = "discussion_logs";
-    private static final String WS_LOG_DIR = "discussion_websocket_logs";
-    private static final String READINGS_LOG_DIR = "discussion_readings_logs";
+    private static final String LOG_BASE = "/app/logs/";
+    private static final String LOG_DIR = LOG_BASE + "discussion_logs/";
+    private static final String WS_LOG_DIR = LOG_BASE + "discussion_websocket_logs/";
+    private static final String READINGS_LOG_DIR = LOG_BASE + "discussion_readings_logs/";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     static {
-        createDirectory(LOG_DIR);
-        createDirectory(WS_LOG_DIR);
+//        createDirectory(LOG_DIR);
+//        createDirectory(WS_LOG_DIR);
         createDirectory(READINGS_LOG_DIR);
     }
 

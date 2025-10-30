@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Swarm AI Interface</title>
+  <title>Swarm Interface</title>
   <style>
     * {
         box-sizing: border-box;
@@ -1024,6 +1024,11 @@
                 currentQuestionOptions = currentQuestion.options.slice(0, 6);
 
                 // optionDisplayIndex remains 0, will be incremented later
+            } else {
+                // Stop execution if no more questions
+                console.log("✅ All questions completed — triggering final popup.");
+                showFinalPopup();
+                return;  // ← CRITICAL: Stop here!
             }
           }
           else {
@@ -1044,12 +1049,20 @@
       // UI updates
       updateUIForRound();
 
-      // Last-round check (dynamic)
-      const persistCount = currentQuestion.persistingOptionsCount;
-      isLastRound = questionIndex === discussionData.questions.length - 1 &&
-                   (6 + (optionDisplayIndex * (6 - persistCount))) >= allOptions.length;
-
       optionDisplayIndex++;
+
+      // Compute final-round condition correctly
+      const persistCount = currentQuestion.persistingOptionsCount;
+      isLastRound =
+          questionIndex === discussionData.questions.length - 1 &&
+          (6 + ((optionDisplayIndex - 1) * (6 - persistCount))) >= allOptions.length;
+
+      // Safety guard to stop if all questions are completed
+      if (questionIndex >= discussionData.questions.length) {
+          console.log("✅ All questions completed — triggering final popup.");
+          showFinalPopup();
+          return;
+      }
   }
 
   // Extracted UI updates
