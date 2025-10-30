@@ -126,7 +126,7 @@ public class ReportService {
 
         try {
             // ✅ 1. Correct path — assuming chat_logs folder is at application root
-            Path chatFilePath = Paths.get("chat_logs", "chat_" + discussionId + ".txt");
+            Path chatFilePath = Paths.get("/app/logs/chat_logs", "chat_" + discussionId + ".txt");
 
             if (!Files.exists(chatFilePath)) {
                 System.err.println("⚠️ Chat file not found for discussion: " + discussionId);

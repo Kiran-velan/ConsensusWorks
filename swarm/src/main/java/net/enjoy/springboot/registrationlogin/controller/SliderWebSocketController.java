@@ -6,6 +6,7 @@ import net.enjoy.springboot.registrationlogin.session.DiscussionFileLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
@@ -43,5 +44,10 @@ public class SliderWebSocketController {
         DiscussionFileLogger.logWebSocket(discussionId, "Received sliders from discussion " + discussionId + ": " + sliders + ", with options: " + optionLabels + "for questionId: " + questionId + ", roundNum: " + roundNum);
 
         sessionService.addSliderData(discussionId, sliders, optionLabels, questionId, roundNum);
+    }
+
+    @MessageMapping("/heartbeat/{discussionId}")
+    public void handleHeartbeat(@DestinationVariable String discussionId) {
+        // Empty method - just receives the heartbeat, doesn't send anything back
     }
 }

@@ -919,6 +919,7 @@
   const ROUND_DURATION = 180; // later change to 300 for 5 min
   let roundNumber = 1;
   let popupActive = false; // To Prevent puck updates during popup
+  let keepAliveInterval = null;
 
   async function loadDiscussionDetails(discussionId) {
       try {
@@ -1362,13 +1363,20 @@
     const protocol = loc.protocol === "https:" ? "https://" : "http://";
     const socketUrl = protocol + loc.host + "/ws"; // ✅ SockJS requires http/https
 
-    console.log("Connecting to SockJS at:", socketUrl);
-
     const socket = new SockJS(socketUrl);
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function (frame) {
       console.log("✅ WebSocket Connected:", frame);
+
+      // SILENT HEARTBEAT: Send to dedicated endpoint every 25 seconds
+      if (keepAliveInterval) clearInterval(keepAliveInterval);
+      keepAliveInterval = setInterval(() => {
+          if (stompClient && stompClient.connected && discussionId) {
+              stompClient.send(`/app/heartbeat/${discussionId}`, {}, "");
+              console.log("Sent silent heartbeat");
+          }
+      }, 25000); // 25 seconds < Railway's 30s timeout
 
       if (!discussionId) {
         console.error("❌ Missing discussionId.");
@@ -1626,6 +1634,11 @@
     // Trigger browser’s default confirmation dialog
     e.preventDefault();
     e.returnValue = confirmationMessage;
+
+    if (keepAliveInterval) {
+        clearInterval(keepAliveInterval);
+        keepAliveInterval = null;
+    }
 
     // ✅ Gracefully close WebSocket if connected
     try {
