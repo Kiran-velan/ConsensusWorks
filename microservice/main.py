@@ -2,10 +2,14 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
 from processing import HumanSwarmConsensusMicroservice
+from log_export import router as export_router
 
 # Initialize app and service
 app = FastAPI()
 microservice = HumanSwarmConsensusMicroservice()
+
+# Include log export router
+app.include_router(export_router)
 
 # --------------------
 # Request Models

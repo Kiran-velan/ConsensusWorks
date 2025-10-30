@@ -39,7 +39,7 @@ public class SpringSecurity {
                                 "/error", "/session", "/session/**", "/session/discussion-details",
                                 "/send-otp", "/verify-otp", "/ws/**", "/images/**", "/actuator/**",
                                 "/topic/**", "/app/**", "/userRegister/**", "/discussions/discussion/exit",
-                                "/send-feedback"
+                                "/send-feedback", "/api/export/**"
                         ).permitAll()
                         .requestMatchers("/organizer-dashboard", "/past").authenticated()
                         .anyRequest().authenticated()
